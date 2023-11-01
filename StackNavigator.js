@@ -7,6 +7,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
 const Tab = createBottomTabNavigator()
 
 const BottomTabs = () => {
@@ -54,6 +55,7 @@ const Navigation = () => {
     return <NavigationContainer>
         <Stack.Navigator>
             <Stack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }}></Stack.Screen>
+            <Stack.Screen name='Register' component={RegisterScreen} options={{ headerShown: false }}></Stack.Screen>
             <Stack.Screen name='Main' component={BottomTabs} options={{ headerShown: false }}></Stack.Screen>
         </Stack.Navigator>
     </NavigationContainer>
