@@ -1,12 +1,18 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, Dimensions, StatusBar, Platform } from 'react-native'
 import React from 'react'
 
 export default function ProfileScreen() {
+    const { width, height } = Dimensions.get('window')
+
     return (
-        <View>
+        <SafeAreaView style={styles.container}>
+            <View>
             <Text>ProfileScreen</Text>
-        </View>
+            </View>
+        </SafeAreaView >
     )
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    container: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+})

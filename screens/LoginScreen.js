@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, Pressable, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, Pressable, ToastAndroid, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import * as React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { FontAwesome5, MaterialIcons, AntDesign, Entypo } from "@expo/vector-icons"
@@ -6,70 +6,66 @@ import { useImmer } from 'use-immer'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import userService from '../services/user.service'
 import axios from 'axios'
+import { useNavigation } from '@react-navigation/native'
 
-export default function LoginScreen({ navigation }) {
-    const [authenticationInfo, setAuthenticationInfo] = useImmer({ email: '', password: '' })
-    const [currentUser, setcurrentUser] = useImmer(null)
-    const [authToken, setAuthToken] = useImmer(null)
-
-    const baseUrl = 'http://192.168.9.106:3000/api';
-    const axiosInstance = axios.create({
-        baseUrl,
-        headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-        }
-    })
-
-    const fetchUser = async (token) => {
-        let response = await axios.post(`${baseUrl}/users/getUserData`, token)
-        console.log(response.data);
-        if (response) {
-            console.log(response.data)
-            setcurrentUser(response.data.user)
-        } else {
-            console.log("Something Went Wrong");
-            return null
-        }
+export const baseUrl = 'http://192.168.9.106:3000/api';
+export const axiosInstance = axios.create({
+    baseUrl,
+    headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
     }
+})
+
+export default function LoginScreen() {
+    const [authenticationInfo, setAuthenticationInfo] = useImmer({ email: '', password: '' })
+    const [authToken, setAuthToken] = useImmer(null)
+    const navigation = useNavigation()
 
     const handleLogin = async () => {
-        const response = await axios.post(`${baseUrl}/users/login`, authenticationInfo)
-        console.log(response.data.token);
-        if (response.data.success) {
-            const token = response.data.token
-            // await AsyncStorage.setItem('jwt', token);
-            setAuthToken(token)
-            // navigation.navigate('Main')
-            return 'logged'
-        } else {
-            console.log(response.data.error);
+        try {
+            const response = await axios.post(`${baseUrl}/users/login`, authenticationInfo)
+            console.log(response.data);
+            if (response.data.success) {
+                const token = response.data.token
+                await AsyncStorage.setItem('jwt', token)
+                navigation.navigate('Main')
+                ToastAndroid.show('Logged in', ToastAndroid.SHORT)
+                return true
+            } else {
+                console.log(response.data.error, ",");
+                ToastAndroid.showWithGravity('Log in failed !', ToastAndroid.SHORT, ToastAndroid.TOP)
+
+            }
+        } catch (error) {
+            console.log(error);
+            ToastAndroid.showWithGravity('Log in failed !', ToastAndroid.SHORT, ToastAndroid.TOP) 
         }
 
     }
     const handleRegister = async () => {
         try {
-            let response = await userService.register(authenticationInfo)
-            let token = response.data.token;
+            const response = await axios.post(`${baseUrl}/users/register`, authenticationInfo)
+            console.log(response.data);
             if (response.data.success) {
+                const token = response.data.token
                 await AsyncStorage.setItem('jwt', token);
-                const currentUser = await fetchUser(token)
-                console.log('registered')
-                console.log(currentUser)
+                setAuthToken(token)
                 navigation.navigate('Main')
-                return "registered"
+                ToastAndroid.show('Registered!', ToastAndroid.SHORT)
+                return true
             } else {
-                return response.data.error
+                console.log(response.data.error, ",");
+                ToastAndroid.showWithGravity('Register failed !', ToastAndroid.SHORT, ToastAndroid.TOP)
+
             }
         } catch (error) {
-            return 'Register failed!'
+            console.log(error);
+            ToastAndroid.showWithGravity('Register failed !', ToastAndroid.SHORT, ToastAndroid.TOP)
         }
     }
 
-
-
-    React.useEffect(() => { console.log(currentUser); }, [currentUser])
-    React.useEffect(() => { fetchUser(authToken) }, [authToken])
+    // React.useEffect(() => { fetchUser(authToken) }, [authToken])
 
     return (
         <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
@@ -93,6 +89,7 @@ export default function LoginScreen({ navigation }) {
                         <TextInput
                             style={styles.input}
                             placeholder="Password"
+                            secureTextEntry={true}
                             placeholderTextColor='#C0C0C0'
                             value={authenticationInfo.password}
                             onChangeText={(e) => setAuthenticationInfo(draft => {
