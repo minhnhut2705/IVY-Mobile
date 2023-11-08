@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView, Pressable, ToastAndroid, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView, Pressable, StatusBar, ToastAndroid, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import * as React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { FontAwesome5, MaterialIcons, AntDesign, Entypo } from "@expo/vector-icons"
@@ -7,6 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import userService from '../services/user.service'
 import axios from 'axios'
 import { useNavigation } from '@react-navigation/native'
+import { useAtom } from 'jotai'
+import { currentUserAtom } from '../store'
 
 export const baseUrl = 'http://192.168.9.106:3000/api';
 export const axiosInstance = axios.create({
@@ -21,14 +23,38 @@ export default function LoginScreen() {
     const [authenticationInfo, setAuthenticationInfo] = useImmer({ email: '', password: '' })
     const [authToken, setAuthToken] = useImmer(null)
     const navigation = useNavigation()
+    const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
+
+    const getCurrentUser = async (token) => {
+        try {
+            if (token) {
+                const response = await axios.post(`${baseUrl}/users/getUserData`, {
+                    jwt: token
+                })
+                if (response.data.success) {
+                    const user = response.data.user
+                    setCurrentUser(user)
+                } else {
+                    ToastAndroid.showWithGravity('Can get user data!', ToastAndroid.SHORT, ToastAndroid.TOP)
+                    setCurrentUser(null)
+                }
+            } else {
+                setCurrentUser(null)
+            }
+        } catch (error) {
+            console.log(error);
+            setCurrentUser(null)
+        }
+    }
+
 
     const handleLogin = async () => {
         try {
             const response = await axios.post(`${baseUrl}/users/login`, authenticationInfo)
-            console.log(response.data);
             if (response.data.success) {
                 const token = response.data.token
                 await AsyncStorage.setItem('jwt', token)
+                await getCurrentUser(token)
                 navigation.navigate('Main')
                 ToastAndroid.show('Logged in', ToastAndroid.SHORT)
                 return true
@@ -65,15 +91,19 @@ export default function LoginScreen() {
         }
     }
 
-    // React.useEffect(() => { fetchUser(authToken) }, [authToken])
-
     return (
         <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.container}>
                 <ScrollView>
                     <SafeAreaView>
+                        <View style={{ justifyContent: 'flex-end', flexDirection: 'row', paddingHorizontal: 10 }}>
+                            <Pressable onPress={() => navigation.navigate('Main')} style={({ pressed }) => pressed ? styles.buttonPressed : styles.button}>
+                                <Text style={styles.buttonText}>Home</Text>
+                            </Pressable>
+                        </View>
                         <View style={{ height: 80 }}></View>
+
                         <FontAwesome5 name="spotify" size={80} style={{ textAlign: 'center' }} color="white" />
                         <Text style={{ color: 'white', fontSize: 40, fontWeight: 'bold', textAlign: 'center', marginTop: 40 }}>Billions of Songs Free on IVY</Text>
                         <View style={{ height: 80 }}></View>
@@ -115,7 +145,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1 },
+    container: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, },
     input: {
         backgroundColor: 'transparent',
         borderColor: '#C0C0C0',

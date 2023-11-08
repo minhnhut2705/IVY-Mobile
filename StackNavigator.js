@@ -17,10 +17,11 @@ const BottomTabs = () => {
                 backgroundColor: "rgba(0,0,0,0.5)",
                 position: "absolute",
                 bottom: 0,
+                height: 50,
                 left: 0,
                 right: 0,
-                // shadowOpacity: 4,
-                // shadowRadius: 4,
+                shadowOpacity: 4,
+                shadowRadius: 4,
                 elevation: 0,
                 shadowOffset: {
                     width: 0,

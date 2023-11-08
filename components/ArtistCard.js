@@ -8,12 +8,12 @@ const ArtistCard = ({ item }) => {
                 style={{ width: 130, height: 130, borderRadius: 5 }}
                 source={{ uri: item.avatar }}
             />
-            <Text
+            <Text numberOfLines={1} ellipsizeMode="tail"
                 style={{
                     fontSize: 13,
                     fontWeight: "500",
                     color: "white",
-                    marginTop: 10,
+                    marginTop: 10, width: 130
                 }}
             >
                 {item?.name}

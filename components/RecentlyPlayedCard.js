@@ -18,9 +18,10 @@ const RecentlyPlayedCard = ({ item }) => {
                 source={{ uri: item?.thumbnail }}
             />
             <Text
-                numberOfLines={1}
+                numberOfLines={1} ellipsizeMode="tail"
                 style={{
                     fontSize: 13,
+                    width: 130,
                     fontWeight: "500",
                     color: "white",
                     marginTop: 10,

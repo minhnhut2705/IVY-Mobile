@@ -1,21 +1,29 @@
-import { StyleSheet, Image, Text, View, SafeAreaView, FlatList, StatusBar, Platform, Pressable, ScrollView } from 'react-native'
+import { StyleSheet, Image, Text, View, FlatList, StatusBar, Platform, Pressable, ScrollView, SafeAreaView } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Link, useNavigation } from '@react-navigation/native'
+import { useNavigation } from '@react-navigation/native'
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import LionelMessi from '../assets/img/lionelMessi.jpg'
-import { axiosInstance } from './LoginScreen';
 import axios from 'axios';
 import { baseUrl } from './LoginScreen';
 import RecentlyPlayedCard from '../components/RecentlyPlayedCard'
 import ArtistCard from '../components/ArtistCard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { currentUserAtom } from '../store';
+import { useAtom } from 'jotai';
+import Header from '../components/Header';
+import AudioPlayer from '../components/Player';
 
 export default function HomeScreen() {
     const navigation = useNavigation()
     const [songs, setSongs] = React.useState([])
     const [artists, setArtists] = React.useState([])
+    const [token, setToken] = React.useState(null)
+    const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
 
-    const handleAuthentication = async () => {
+    const handleLogout = async () => {
+        await AsyncStorage.removeItem('jwt')
+        setToken(null)
+        setCurrentUser(null)
         navigation.navigate('Login')
     }
 
@@ -30,8 +38,6 @@ export default function HomeScreen() {
     const getAllArtists = async () => {
         try {
             const response = await axios.get(`${baseUrl}/artists`)
-
-            console.log('response artists', response.data.artists);
             setArtists(response.data.artists)
         } catch (error) {
             console.log(error);
@@ -43,7 +49,6 @@ export default function HomeScreen() {
         getAllSongs()
         getAllArtists()
     }, [])
-
 
     const renderSong = ({ item }) => {
         return (
@@ -79,12 +84,9 @@ export default function HomeScreen() {
 
     return (
         <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
-            <ScrollView style={styles.container}>
-                <View style={{ justifyContent: 'flex-end', flexDirection: 'row', paddingHorizontal: 10 }}>
-                    <Pressable onPress={() => handleAuthentication()} style={({ pressed }) => pressed ? styles.buttonPressed : styles.button}>
-                        <Text style={styles.buttonText}>Login / Register</Text>
-                    </Pressable>
-                </View>
+            <SafeAreaView style={styles.container}>
+                <ScrollView >
+                    <Header></Header>
                 <View
                     style={{
                         marginHorizontal: 12,
@@ -180,7 +182,7 @@ export default function HomeScreen() {
                             />
                         </View>
                         <View style={styles.randomArtist}>
-                            <Text
+                                <Text numberOfLines={2} ellipsizeMode="tail"
                                 style={{ color: "white", fontSize: 13, fontWeight: "bold" }}
                             >
                                 Hiphop Tamhiza
@@ -212,6 +214,26 @@ export default function HomeScreen() {
                     ))}
                 </ScrollView>
 
+                    <View style={{ height: 10 }} />
+                    <Text
+                        style={{
+                            color: "white",
+                            fontSize: 19,
+                            fontWeight: "bold",
+                            marginHorizontal: 10,
+                            marginTop: 10,
+                        }}
+                    >
+                        Recently Played
+                    </Text>
+                    <FlatList
+                        data={songs.splice(0, 4)}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={({ item, index }) => (
+                            <RecentlyPlayedCard item={item} key={index} />
+                        )}
+                    />
                 <View style={{ height: 10 }} />
                 <Text
                     style={{
@@ -232,13 +254,15 @@ export default function HomeScreen() {
                         <RecentlyPlayedCard item={item} key={index} />
                     )}
                 />
+                    <AudioPlayer></AudioPlayer>
             </ScrollView >
+            </SafeAreaView>
         </LinearGradient >
     )
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, },
+    container: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, marginBottom: Platform.OS === 'android' ? 50 : 0 },
     button: {
         backgroundColor: "#131624",
         paddingVertical: 10,
