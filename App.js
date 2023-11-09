@@ -5,7 +5,7 @@ import { Provider } from 'jotai';
 export default function App() {
   return (
     <Provider>
-    <Navigation />
+      <Navigation />
     </Provider>
   );
 }

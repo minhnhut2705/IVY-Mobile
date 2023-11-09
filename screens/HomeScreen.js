@@ -18,7 +18,8 @@ export default function HomeScreen() {
     const [songs, setSongs] = React.useState([])
     const [artists, setArtists] = React.useState([])
     const [token, setToken] = React.useState(null)
-    // const [songState, setSongState] = useAtom(songStateAtom)
+    const [songState, setSongState] = useAtom(songStateAtom)
+    const [playingSong, setplayingSong] = useAtom(songStateAtom)
 
 
     const getAllSongs = async () => {
@@ -39,9 +40,14 @@ export default function HomeScreen() {
     }
     const setPlayingSong = async (songURL) => {
         try {
-            await AsyncStorage.setItem('songURL', songURL)
+            setSongState(prev => (
+                {
+                    ...prev,
+                    songURL: songURL
+                }
+            ))
         } catch (error) {
-            console.log(error);
+            console.log(error, "x");
         }
     }
 
@@ -50,6 +56,11 @@ export default function HomeScreen() {
         getAllSongs()
         getAllArtists()
     }, [])
+    React.useEffect(() => {
+        console.log('====================================');
+        console.log(songState);
+        console.log('====================================');
+    }, [songState])
 
     const renderSong = ({ item }) => {
         return (
@@ -86,6 +97,8 @@ export default function HomeScreen() {
     };
 
     return (
+        <>
+            <StatusBar style='light'></StatusBar>
         <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
             <SafeAreaView style={styles.container}>
                 <ScrollView >
@@ -259,7 +272,8 @@ export default function HomeScreen() {
                 </ScrollView >
                 <AudioPlayer></AudioPlayer>
             </SafeAreaView>
-        </LinearGradient >
+            </LinearGradient >
+        </>
     )
 }
 
