@@ -1,9 +1,12 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import Navigation from './StackNavigator';
+import { Provider } from 'jotai';
 export default function App() {
   return (
+    <Provider>
     <Navigation />
+    </Provider>
   );
 }
 

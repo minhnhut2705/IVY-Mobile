@@ -8,7 +8,7 @@ import { baseUrl } from './LoginScreen';
 import RecentlyPlayedCard from '../components/RecentlyPlayedCard'
 import ArtistCard from '../components/ArtistCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { currentUserAtom } from '../store';
+import { currentUserAtom, songStateAtom } from '../store';
 import { useAtom } from 'jotai';
 import Header from '../components/Header';
 import AudioPlayer from '../components/Player';
@@ -18,14 +18,8 @@ export default function HomeScreen() {
     const [songs, setSongs] = React.useState([])
     const [artists, setArtists] = React.useState([])
     const [token, setToken] = React.useState(null)
-    const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
+    // const [songState, setSongState] = useAtom(songStateAtom)
 
-    const handleLogout = async () => {
-        await AsyncStorage.removeItem('jwt')
-        setToken(null)
-        setCurrentUser(null)
-        navigation.navigate('Login')
-    }
 
     const getAllSongs = async () => {
         try {
@@ -39,6 +33,13 @@ export default function HomeScreen() {
         try {
             const response = await axios.get(`${baseUrl}/artists`)
             setArtists(response.data.artists)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const setPlayingSong = async (songURL) => {
+        try {
+            await AsyncStorage.setItem('songURL', songURL)
         } catch (error) {
             console.log(error);
         }
@@ -63,6 +64,8 @@ export default function HomeScreen() {
                     borderRadius: 4,
                     elevation: 3,
                 }}
+
+                onPress={() => setPlayingSong(item.songURL)}
             >
                 <Image
                     style={{ height: 55, width: 55 }}
@@ -209,11 +212,10 @@ export default function HomeScreen() {
                     Your Top Artists
                 </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {artists.map((item, index) => (
-                        <ArtistCard item={item} key={index} />
-                    ))}
-                </ScrollView>
-
+                        {artists.map((item, index) => (
+                            <ArtistCard item={item} key={index} />
+                        ))}
+                    </ScrollView>
                     <View style={{ height: 10 }} />
                     <Text
                         style={{
@@ -254,8 +256,8 @@ export default function HomeScreen() {
                         <RecentlyPlayedCard item={item} key={index} />
                     )}
                 />
-                    <AudioPlayer></AudioPlayer>
-            </ScrollView >
+                </ScrollView >
+                <AudioPlayer></AudioPlayer>
             </SafeAreaView>
         </LinearGradient >
     )

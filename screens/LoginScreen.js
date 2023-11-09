@@ -97,14 +97,14 @@ export default function LoginScreen() {
                 style={styles.container}>
                 <ScrollView>
                     <SafeAreaView>
-                        <View style={{ justifyContent: 'flex-end', flexDirection: 'row', paddingHorizontal: 10 }}>
-                            <Pressable onPress={() => navigation.navigate('Main')} style={({ pressed }) => pressed ? styles.buttonPressed : styles.button}>
-                                <Text style={styles.buttonText}>Home</Text>
+                        <View style={{ paddingHorizontal: 10 }}>
+                            <Pressable onPress={() => navigation.navigate('Main')}>
+                                <Entypo name="home" size={24} color="white" />
                             </Pressable>
                         </View>
                         <View style={{ height: 80 }}></View>
 
-                        <FontAwesome5 name="spotify" size={80} style={{ textAlign: 'center' }} color="white" />
+                        {/* <FontAwesome5 name="spotify" size={80} style={{ textAlign: 'center' }} color="white" /> */}
                         <Text style={{ color: 'white', fontSize: 40, fontWeight: 'bold', textAlign: 'center', marginTop: 40 }}>Billions of Songs Free on IVY</Text>
                         <View style={{ height: 80 }}></View>
                         <TextInput

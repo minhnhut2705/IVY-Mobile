@@ -1,13 +1,11 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import HomeScreen from './screens/HomeScreen'
-import { Entypo } from '@expo/vector-icons';
-import { AntDesign } from '@expo/vector-icons';
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, FontAwesome5, Entypo, Ionicons } from '@expo/vector-icons';
 import ProfileScreen from './screens/ProfileScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from './screens/LoginScreen';
-import RegisterScreen from './screens/RegisterScreen';
+import SongScreen from './screens/SongScreen';
 const Tab = createBottomTabNavigator()
 
 const BottomTabs = () => {
@@ -38,6 +36,14 @@ const BottomTabs = () => {
                     ) : (<AntDesign name="home" size={24} color="white" />)
                 }
             }} />
+            <Tab.Screen name='Song' component={SongScreen} options={{
+                tabBarLabel: 'Song', headerShown: false, tabBarLabelStyle: { color: 'white' },
+                tabBarIcon: ({ focused }) => {
+                    return focused ? (
+                        <Ionicons name="musical-notes" size={24} color="white" />
+                    ) : (<Ionicons name="musical-notes-outline" size={24} color="white" />)
+                }
+            }} />
             <Tab.Screen name='Profile' component={ProfileScreen} options={{
                 tabBarLabel: 'Profile', headerShown: false, tabBarLabelStyle: { color: 'white' },
                 tabBarIcon: ({ focused }) => {
@@ -46,6 +52,7 @@ const BottomTabs = () => {
                     ) : (<Ionicons name="person-outline" size={24} color="white" />)
                 }
             }} />
+
         </Tab.Navigator>
     )
 }
