@@ -32,6 +32,7 @@ export default function AudioPlayer() {
 
     const handlePlayPause = async () => {
         try {
+
             if (sound) {
                 const { isPlaying, positionMillis, durationMillis } = await sound.getStatusAsync();
                 console.log(positionMillis, durationMillis);
@@ -98,17 +99,17 @@ export default function AudioPlayer() {
 
 
 
-    console.log('====================================');
-    console.log("positionMillis / durationMillis", progress);
-    console.log('====================================');
-    React.useEffect(() => {
-        loadAudio();
-        return () => {
-            if (sound) {
-                sound.unloadAsync();
-            }
-        };
-    }, []);
+    // console.log('====================================');
+    // console.log("positionMillis / durationMillis", progress);
+    // console.log('====================================');
+    // React.useEffect(() => {
+    //     loadAudio();
+    //     return () => {
+    //         if (sound) {
+    //             sound.unloadAsync();
+    //         }
+    //     };
+    // }, []);
 
     React.useEffect(() => {
         loadAudio(songState?.songURL);
@@ -161,6 +162,7 @@ export default function AudioPlayer() {
 
         <View>
             <View style={styles.container}>
+                <Text style={{ color: 'white' }}>{songState.songName}</Text>
             <Pressable style={styles.icon} onPress={handleRandom}>
                     <FontAwesome5 name="random" size={24} color={songState?.isRandom ? '#FD841F' : 'white'} />
             </Pressable>

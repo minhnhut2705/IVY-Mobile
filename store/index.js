@@ -6,6 +6,7 @@ export const currentUserAtom = atom(null)
 export const playingSongAtom = atom('')
 export const songStateAtom = atom({
     songURL: '',
+    songName: '',
     isPlaying: false,
     isRandom: false,
     isRepeat: false

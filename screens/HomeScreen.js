@@ -13,19 +13,30 @@ import { useAtom } from 'jotai';
 import Header from '../components/Header';
 import AudioPlayer from '../components/Player';
 
-export default function HomeScreen() {
+const HomeScreen = () => {
     const navigation = useNavigation()
     const [songs, setSongs] = React.useState([])
     const [artists, setArtists] = React.useState([])
-    const [token, setToken] = React.useState(null)
     const [songState, setSongState] = useAtom(songStateAtom)
-    const [playingSong, setplayingSong] = useAtom(songStateAtom)
+
+    React.useEffect(() => {
+        getAllSongs()
+        getAllArtists()
+    }, [])
+
+    React.useEffect(() => {
+        console.log("songs", songs[0]);
+
+    }, [songs])
 
 
     const getAllSongs = async () => {
         try {
             const response = await axios.get(`${baseUrl}/songs`)
-            setSongs(response.data.songs)
+            setSongs(response.data.songs.splice(0, 4))
+            console.log('====================================');
+            console.log('Set songs called', response.data.songs[0].name);
+            console.log('====================================');
         } catch (error) {
             console.log(error);
         }
@@ -38,12 +49,13 @@ export default function HomeScreen() {
             console.log(error);
         }
     }
-    const setPlayingSong = async (songURL) => {
+    const setPlayingSong = async (songURL, name) => {
         try {
             setSongState(prev => (
                 {
                     ...prev,
-                    songURL: songURL
+                    songURL: songURL,
+                    songName: name
                 }
             ))
         } catch (error) {
@@ -52,15 +64,6 @@ export default function HomeScreen() {
     }
 
 
-    React.useEffect(() => {
-        getAllSongs()
-        getAllArtists()
-    }, [])
-    React.useEffect(() => {
-        console.log('====================================');
-        console.log(songState);
-        console.log('====================================');
-    }, [songState])
 
     const renderSong = ({ item }) => {
         return (
@@ -76,7 +79,7 @@ export default function HomeScreen() {
                     elevation: 3,
                 }}
 
-                onPress={() => setPlayingSong(item.songURL)}
+                onPress={() => setPlayingSong(item.songURL, item.name)}
             >
                 <Image
                     style={{ height: 55, width: 55 }}
@@ -96,135 +99,136 @@ export default function HomeScreen() {
         );
     };
 
-    return (
-        <>
-            <StatusBar style='light'></StatusBar>
+    return <>
+        <View><Text>
+            {songs[6]?.name}</Text></View>
+        <StatusBar style='light'></StatusBar>
         <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
             <SafeAreaView style={styles.container}>
                 <ScrollView >
                     <Header></Header>
-                <View
-                    style={{
-                        marginHorizontal: 12,
-                        marginVertical: 5,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 10,
-                    }}
-                >
-                    <Pressable
+                    <View
                         style={{
-                            backgroundColor: "#282828",
-                            padding: 10,
-                            borderRadius: 30,
-                        }}
-                    >
-                        <Text style={{ fontSize: 15, color: "white" }}>Music</Text>
-                    </Pressable>
-
-                    <Pressable
-                        style={{
-                            backgroundColor: "#282828",
-                            padding: 10,
-                            borderRadius: 30,
-                        }}
-                    >
-                        <Text style={{ fontSize: 15, color: "white" }}>
-                            Podcasts & Shows
-                        </Text>
-                    </Pressable>
-                </View>
-
-                <View style={{ height: 10 }} />
-
-                <View
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                    }}
-                >
-                    <Pressable
-                        onPress={() => navigation.navigate("Liked")}
-                        style={{
-                            marginBottom: 10,
+                            marginHorizontal: 12,
+                            marginVertical: 5,
                             flexDirection: "row",
                             alignItems: "center",
                             gap: 10,
-                            flex: 1,
-                            marginHorizontal: 10,
-                            marginVertical: 8,
-                            backgroundColor: "#202020",
-                            borderRadius: 4,
-                            elevation: 3,
                         }}
                     >
-                        <LinearGradient colors={["#33006F", "#FFFFFF"]}>
-                            <Pressable
-                                style={{
-                                    width: 55,
-                                    height: 55,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <AntDesign name="heart" size={24} color="white" />
-                            </Pressable>
-                        </LinearGradient>
+                        <Pressable
+                            style={{
+                                backgroundColor: "#282828",
+                                padding: 10,
+                                borderRadius: 30,
+                            }}
+                        >
+                            <Text style={{ fontSize: 15, color: "white" }}>Music</Text>
+                        </Pressable>
 
-                        <Text style={{ color: "white", fontSize: 13, fontWeight: "bold" }}>
-                            Liked Songs
-                        </Text>
-                    </Pressable>
+                        <Pressable
+                            style={{
+                                backgroundColor: "#282828",
+                                padding: 10,
+                                borderRadius: 30,
+                            }}
+                        >
+                            <Text style={{ fontSize: 15, color: "white" }}>
+                                Podcasts & Shows
+                            </Text>
+                        </Pressable>
+                    </View>
+
+                    <View style={{ height: 10 }} />
 
                     <View
                         style={{
-                            marginBottom: 10,
                             flexDirection: "row",
                             alignItems: "center",
-                            gap: 10,
-                            flex: 1,
-                            marginHorizontal: 10,
-                            marginVertical: 8,
-                            backgroundColor: "#202020",
-                            borderRadius: 4,
-                            elevation: 3,
+                            justifyContent: "space-between",
                         }}
                     >
-                        <View>
-                            <Image
-                                style={{ width: 55, height: 55 }}
-                                source={{ uri: "https://via.placeholder.com/150/771796" }}
-                            />
-                        </View>
-                        <View style={styles.randomArtist}>
-                                <Text numberOfLines={2} ellipsizeMode="tail"
-                                style={{ color: "white", fontSize: 13, fontWeight: "bold" }}
-                            >
-                                Hiphop Tamhiza
+                        <Pressable
+                            onPress={() => navigation.navigate("Liked")}
+                            style={{
+                                marginBottom: 10,
+                                flexDirection: "row",
+                                alignItems: "center",
+                                gap: 10,
+                                flex: 1,
+                                marginHorizontal: 10,
+                                marginVertical: 8,
+                                backgroundColor: "#202020",
+                                borderRadius: 4,
+                                elevation: 3,
+                            }}
+                        >
+                            <LinearGradient colors={["#33006F", "#FFFFFF"]}>
+                                <Pressable
+                                    style={{
+                                        width: 55,
+                                        height: 55,
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <AntDesign name="heart" size={24} color="white" />
+                                </Pressable>
+                            </LinearGradient>
+
+                            <Text style={{ color: "white", fontSize: 13, fontWeight: "bold" }}>
+                                Liked Songs
                             </Text>
+                        </Pressable>
+
+                        <View
+                            style={{
+                                marginBottom: 10,
+                                flexDirection: "row",
+                                alignItems: "center",
+                                gap: 10,
+                                flex: 1,
+                                marginHorizontal: 10,
+                                marginVertical: 8,
+                                backgroundColor: "#202020",
+                                borderRadius: 4,
+                                elevation: 3,
+                            }}
+                        >
+                            <View>
+                                <Image
+                                    style={{ width: 55, height: 55 }}
+                                    source={{ uri: "https://via.placeholder.com/150/771796" }}
+                                />
+                            </View>
+                            <View style={styles.randomArtist}>
+                                <Text numberOfLines={2} ellipsizeMode="tail"
+                                    style={{ color: "white", fontSize: 13, fontWeight: "bold" }}
+                                >
+                                    Hiphop Tamhiza
+                                </Text>
+                            </View>
                         </View>
                     </View>
-                </View>
-                <FlatList
-                    data={songs.splice(0, 4)}
-                    renderItem={renderSong}
-                    numColumns={2}
-                    columnWrapperStyle={{ justifyContent: "space-between" }}
-                />
+                    <FlatList
+                        data={songs}
+                        renderItem={renderSong}
+                        numColumns={2}
+                        columnWrapperStyle={{ justifyContent: "space-between" }}
+                    />
 
-                <Text
-                    style={{
-                        color: "white",
-                        fontSize: 19,
-                        fontWeight: "bold",
-                        marginHorizontal: 10,
-                        marginTop: 10,
-                    }}
-                >
-                    Your Top Artists
-                </Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <Text
+                        style={{
+                            color: "white",
+                            fontSize: 19,
+                            fontWeight: "bold",
+                            marginHorizontal: 10,
+                            marginTop: 10,
+                        }}
+                    >
+                        Your Top Artists
+                    </Text>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         {artists.map((item, index) => (
                             <ArtistCard item={item} key={index} />
                         ))}
@@ -242,40 +246,41 @@ export default function HomeScreen() {
                         Recently Played
                     </Text>
                     <FlatList
-                        data={songs.splice(0, 4)}
+                        data={songs}
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         renderItem={({ item, index }) => (
                             <RecentlyPlayedCard item={item} key={index} />
                         )}
                     />
-                <View style={{ height: 10 }} />
-                <Text
-                    style={{
-                        color: "white",
-                        fontSize: 19,
-                        fontWeight: "bold",
-                        marginHorizontal: 10,
-                        marginTop: 10,
-                    }}
-                >
-                    Recently Played
-                </Text>
-                <FlatList
-                    data={songs.splice(0, 4)}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({ item, index }) => (
-                        <RecentlyPlayedCard item={item} key={index} />
-                    )}
-                />
+                    <View style={{ height: 10 }} />
+                    <Text
+                        style={{
+                            color: "white",
+                            fontSize: 19,
+                            fontWeight: "bold",
+                            marginHorizontal: 10,
+                            marginTop: 10,
+                        }}
+                    >
+                        Recently Played
+                    </Text>
+                    <FlatList
+                        data={songs}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={({ item, index }) => (
+                            <RecentlyPlayedCard item={item} key={index} />
+                        )}
+                    />
                 </ScrollView >
                 <AudioPlayer></AudioPlayer>
             </SafeAreaView>
-            </LinearGradient >
-        </>
-    )
+        </LinearGradient >
+    </>
 }
+
+export default HomeScreen
 
 const styles = StyleSheet.create({
     container: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, marginBottom: Platform.OS === 'android' ? 50 : 0 },
