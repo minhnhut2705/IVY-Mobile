@@ -5,8 +5,7 @@ import React from 'react';
 export const currentUserAtom = atom(null)
 export const playingSongAtom = atom('')
 export const songStateAtom = atom({
-    songURL: '',
-    songName: '',
+    song: null,
     isPlaying: false,
     isRandom: false,
     isRepeat: false

@@ -22,6 +22,7 @@ export default function Header() {
         navigation.navigate('Login')
     }
 
+
     return currentUser ? <View style={{
         padding: 10,
         flexDirection: "row",

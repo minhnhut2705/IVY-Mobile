@@ -17,11 +17,17 @@ export default function AudioPlayer() {
 
     const loadAudio = async (songURL = 'https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/mp3%2FDemons1683259252539?alt=media&token=e5189d6a-5fa0-45fb-98ee-092f751d4089') => {
         try {
-            const { sound, status } = await Audio.Sound.createAsync(
+            const { sound: song, status } = await Audio.Sound.createAsync(
                 { uri: songURL }, // Replace with the path to your audio file
-                { shouldPlay: false }, (status) => setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
+                { shouldPlay: true }, (status) => setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
             );
-            setSound(sound);
+            await song.playAsync()
+            setSound(song);
+            setSongState(prev => ({
+                ...prev,
+                isPlaying: true
+
+            }))
             // setdurationMillis(status.durationMillis / 1000)
         } catch (error) {
             console.log('====================================');
@@ -34,8 +40,7 @@ export default function AudioPlayer() {
         try {
 
             if (sound) {
-                const { isPlaying, positionMillis, durationMillis } = await sound.getStatusAsync();
-                console.log(positionMillis, durationMillis);
+                const { isPlaying } = await sound.getStatusAsync();
                 if (isPlaying) {
                     await sound.pauseAsync();
                     setSongState(prev => (
@@ -112,13 +117,16 @@ export default function AudioPlayer() {
     // }, []);
 
     React.useEffect(() => {
-        loadAudio(songState?.songURL);
+        if (sound) {
+            sound.unloadAsync();
+        }
+        loadAudio(songState.song?.songURL);
         return () => {
             if (sound) {
                 sound.unloadAsync();
             }
         };
-    }, [songState.songURL]);
+    }, [songState.song?.songURL]);
 
     // React.useEffect(() => {
     //     return sound
@@ -162,7 +170,10 @@ export default function AudioPlayer() {
 
         <View>
             <View style={styles.container}>
-                <Text style={{ color: 'white' }}>{songState.songName}</Text>
+
+                <View style={{ width: '15%' }}>
+                    <Text numberOfLines={1} ellipsizeMode='tail' style={{ color: 'white' }}>{songState.song?.name}</Text>
+                </View>
             <Pressable style={styles.icon} onPress={handleRandom}>
                     <FontAwesome5 name="random" size={24} color={songState?.isRandom ? '#FD841F' : 'white'} />
             </Pressable>
@@ -197,6 +208,7 @@ const styles = StyleSheet.create({
         paddingVertical: 20,
         position: 'absolute',
         bottom: 0,
+        height: 70,
         left: 0,
         right: 0,
     },
