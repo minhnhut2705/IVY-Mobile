@@ -17,24 +17,22 @@ import SongSquareCard from '../components/SongSquareCard';
 const HomeScreen = () => {
     const navigation = useNavigation()
     const [topSongs, setTopSongs] = React.useState([])
+    const [allSongs, setAllSongs] = React.useState([])
     const [favoriteSongs, setFavoriteSongs] = React.useState([])
     const [recentlyPlayedSongs, setRecentlyPlayedSongs] = React.useState([])
-    const [artists, setArtists] = React.useState([])
+    const [topArtists, setTopArtists] = React.useState([])
     const [songState, setSongState] = useAtom(songStateAtom)
     const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
 
     React.useEffect(() => {
-        getTopSongs()
-        getAllArtists()
+        getTopSongs(6)
+        geTopArtists(6)
     }, [])
 
     React.useEffect(() => {
         if (currentUser) {
             getFavoriteSongs(currentUser.favorites)
             getRecentlyPlayedSongs(currentUser.recentlyPlayed)
-            console.log('====================================');
-            console.log("currentUser.recentlyPlayed", currentUser.recentlyPlayed);
-            console.log('====================================');
         }
 
     }, [currentUser])
@@ -45,9 +43,9 @@ const HomeScreen = () => {
 
     // }, [currentUser?.recentlyPlayed])
 
-    const getTopSongs = async () => {
+    const getTopSongs = async (numOfSong) => {
         try {
-            const response = await axios.post(`${baseUrl}/songs`, { numOfSong: 6 })
+            const response = await axios.post(`${baseUrl}/songs`, { numOfSong: numOfSong })
             setTopSongs(response.data.songs)
         } catch (error) {
             console.log(error);
@@ -64,7 +62,7 @@ const HomeScreen = () => {
     }
     const getRecentlyPlayedSongs = async (recentlyPlayed) => {
         try {
-            const response = await axios.post(`${baseUrl}/songs/getRecentlyPlayedSongs`, { recentlyPlayed: recentlyPlayed })
+            const response = await axios.post(`${baseUrl}/songs/getRecentlyPlayed`, { recentlyPlayed: recentlyPlayed })
             setRecentlyPlayedSongs(response.data.songs)
         } catch (error) {
             console.log(error);
@@ -82,31 +80,45 @@ const HomeScreen = () => {
             console.log(error);
         }
     }
-    const getAllArtists = async () => {
+    const updateSongStream = async (songId, stream) => {
         try {
-            const response = await axios.get(`${baseUrl}/artists`)
-            setArtists(response.data.artists)
+            const response = await axios.patch(`${baseUrl}/songs/update/${songId}/stream`, { stream: stream })
+
+
+            console.log('====================================');
+            console.log("stream", stream);
+            console.log("response.data.song.stream", response.data.song.stream);
+            console.log('====================================');
         } catch (error) {
             console.log(error);
         }
     }
-    const setPlayingSong = async (song) => {
+    const geTopArtists = async (numOfArtists) => {
+        try {
+            const response = await axios.post(`${baseUrl}/artists`, { numOfArtists: numOfArtists })
+            setTopArtists(response.data.artists)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const setPlayingSong = async (song, index) => {
         try {
             setSongState(prev => (
                 {
                     ...prev,
+                    index: index,
                     song: song
                 }
             ))
-            console.log('====================================');
-            console.log("song", song._id);
-            console.log('====================================');
             if (currentUser) {
                 const playedSongs = currentUser.recentlyPlayed.includes(song._id) ? currentUser.recentlyPlayed : [...currentUser.recentlyPlayed, song._id]
-                console.log('====================================');
-                console.log('playedSongs', playedSongs);
-                console.log('====================================');
+
                 await updateUserRecentlyPlayed(currentUser._id, playedSongs)
+                console.log('====================================');
+                console.log("song.stream + 1", song.stream + 1)
+                console.log('====================================');
+                await updateSongStream(song._id, song.stream + 1)
+                await getTopSongs(6)
             }
         } catch (error) {
             console.log(error, "x");
@@ -115,7 +127,7 @@ const HomeScreen = () => {
 
 
 
-    const renderSong = ({ item }) => {
+    const renderSong = ({ item, index }) => {
         return (
             <Pressable
                 style={{
@@ -129,7 +141,7 @@ const HomeScreen = () => {
                     elevation: 3,
                 }}
 
-                onPress={() => setPlayingSong(item)}
+                onPress={() => setPlayingSong(item, index)}
             >
                 <Image
                     style={{ height: 55, width: 55 }}
@@ -153,7 +165,7 @@ const HomeScreen = () => {
         <StatusBar style='light'></StatusBar>
         <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
             <SafeAreaView style={styles.container}>
-                <ScrollView >
+                <ScrollView style={{ marginBottom: Platform.OS == 'android' ? 70 : 0 }}>
                     <Header></Header>
                     <View
                         style={{
@@ -182,7 +194,7 @@ const HomeScreen = () => {
                             }}
                         >
                             <Text style={{ fontSize: 15, color: "white" }}>
-                                Podcasts & Shows
+                                Artist
                             </Text>
                         </Pressable>
                     </View>
@@ -301,11 +313,10 @@ const HomeScreen = () => {
                         renderItem={({ item, index }) => (
                             <RecentlyPlayedCard item={item} key={index} />
                         )}
-                    />
-                    <View style={{ height: 10 }} />
-                    </>
-                    }
+                        /> 
+                    </>}
 
+                    <View style={{ height: 10 }} />
                     <Text
                         style={{
                             color: "white",
@@ -315,16 +326,17 @@ const HomeScreen = () => {
                             marginTop: 10,
                         }}
                     >
-                        Recently Played
+                        Top Artists
                     </Text>
                     <FlatList
-                        data={topSongs}
+                        data={topArtists}
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         renderItem={({ item, index }) => (
-                            <RecentlyPlayedCard item={item} key={index} />
+                            <ArtistCard item={item} key={index} />
                         )}
                     />
+                    <View style={{ height: 10 }} />
                 </ScrollView >
                 <AudioPlayer></AudioPlayer>
             </SafeAreaView>

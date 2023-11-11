@@ -5,21 +5,31 @@ import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { useAtom } from 'jotai';
 import { songStateAtom, playingSongAtom } from '../store';
 import { ProgressBar, MD3Colors } from 'react-native-paper';
-
+import axios from 'axios'
+import { baseUrl } from '../screens/LoginScreen';
 
 export default function AudioPlayer() {
     const [sound, setSound] = React.useState();
+    const [allSongs, setAllSongs] = React.useState();
     const [songState, setSongState] = useAtom(songStateAtom)
-    const [playingSong, setplayingSong] = useAtom(songStateAtom)
-    const [durationMillis, setdurationMillis] = React.useState();
-    const [positionMillis, setPositionMillis] = React.useState(0);
     const [progress, setProgress] = React.useState(0);
 
-    const loadAudio = async (songURL = 'https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/mp3%2FDemons1683259252539?alt=media&token=e5189d6a-5fa0-45fb-98ee-092f751d4089') => {
+    const defaultSongUrl = 'https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/mp3%2FDemons1683259252539?alt=media&token=e5189d6a-5fa0-45fb-98ee-092f751d4089'
+
+    const loadAudio = async (songURL = defaultSongUrl) => {
         try {
             const { sound: song, status } = await Audio.Sound.createAsync(
                 { uri: songURL }, // Replace with the path to your audio file
-                { shouldPlay: true }, (status) => setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
+                { shouldPlay: songURL != defaultSongUrl }, (status) => {
+                    setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
+                    // console.log('====================================');
+                    // console.log(status.didJustFinish, status.isLooping, songState.isRepeat);
+                    // console.log('====================================');
+                    if (status.didJustFinish && songState.isRepeat) {
+
+                        song.playAsync()
+                    }
+                }
             );
             await song.playAsync()
             setSound(song);
@@ -69,8 +79,14 @@ export default function AudioPlayer() {
     };
 
 
-
-
+    const getAllSongs = async () => {
+        try {
+            const response = await axios.get(`${baseUrl}/songs`)
+            setAllSongs(response.data.songs)
+        } catch (error) {
+            console.log(error);
+        }
+    }
     const handleRepeat = async () => {
         try {
             setSongState(prev => (
@@ -79,6 +95,11 @@ export default function AudioPlayer() {
                     isRepeat: !songState.isRepeat
                 }
             ))
+            const x = await sound?.setIsLoopingAsync(true)
+            console.log('====================================');
+            console.log("x", x);
+            console.log('====================================');
+
         } catch (error) {
             console.log('====================================');
             console.log(error);
@@ -102,6 +123,22 @@ export default function AudioPlayer() {
         }
     };
 
+    const handleNextPreviousSong = async (song, index) => {
+        try {
+            setSongState(prev => (
+                {
+                    ...prev,
+                    song: song,
+                    index: index
+                }
+            ))
+        } catch (error) {
+            console.log('====================================');
+            console.log(error);
+            console.log('====================================');
+        }
+    };
+
 
 
     // console.log('====================================');
@@ -115,6 +152,10 @@ export default function AudioPlayer() {
     //         }
     //     };
     // }, []);
+
+    React.useEffect(() => {
+        getAllSongs()
+    }, [])
 
     React.useEffect(() => {
         if (sound) {
@@ -177,14 +218,24 @@ export default function AudioPlayer() {
             <Pressable style={styles.icon} onPress={handleRandom}>
                     <FontAwesome5 name="random" size={24} color={songState?.isRandom ? '#FD841F' : 'white'} />
             </Pressable>
-            <Pressable style={styles.icon}>
+                <Pressable style={styles.icon} onPress={() => handleNextPreviousSong(allSongs[songState.index - 1], songState.index - 1)}>
                 <FontAwesome5 name="step-backward" size={24} color="white" />
             </Pressable>
             <Pressable style={styles.icon} onPress={handlePlayPause}>
                     {songState?.isPlaying ? <FontAwesome5 name="pause" size={24} color="white" /> : < FontAwesome5 name="play" size={24} color="white" />
                 }
             </Pressable>
-            <Pressable style={styles.icon}>
+                <Pressable style={styles.icon} onPress={() => {
+                    let index = songState.index + 1
+                    if (songState.isRandom) {
+                        index = Math.floor(Math.random() * allSongs.length)
+                    }
+                    console.log('====================================');
+                    console.log("index", index);
+                    console.log('====================================');
+
+                    handleNextPreviousSong(allSongs[index], index)
+                }}>
                 <FontAwesome5 name="step-forward" size={24} color="white" />
             </Pressable>
             <Pressable style={styles.icon} onPress={handleRepeat} >

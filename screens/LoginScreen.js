@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native'
 import { useAtom } from 'jotai'
 import { currentUserAtom } from '../store'
 
-export const baseUrl = 'http://172.16.2.78:3000/api';
+export const baseUrl = 'http://192.168.2.154:3000/api';
 export const axiosInstance = axios.create({
     baseUrl,
     headers: {
