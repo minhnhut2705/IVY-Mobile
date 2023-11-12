@@ -105,7 +105,7 @@ export default function LoginScreen() {
                         <View style={{ height: 80 }}></View>
 
                         {/* <FontAwesome5 name="spotify" size={80} style={{ textAlign: 'center' }} color="white" /> */}
-                        <Text style={{ color: 'white', fontSize: 40, fontWeight: 'bold', textAlign: 'center', marginTop: 40 }}>Billions of Songs Free on IVY</Text>
+                        <Text style={{ color: 'white', fontSize: 40, fontWeight: 'bold', textAlign: 'center', marginTop: 40 }}>IVY - The music streaming system</Text>
                         <View style={{ height: 80 }}></View>
                         <TextInput
                             style={styles.input}
@@ -145,7 +145,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, },
+    container: { flex: 1, },
     input: {
         backgroundColor: 'transparent',
         borderColor: '#C0C0C0',

@@ -158,7 +158,7 @@ const HomeScreen = () => {
             <SafeAreaView style={styles.container}>
                 <ScrollView style={{ marginBottom: Platform.OS == 'android' ? 70 : 0 }}>
                     <Header></Header>
-                    <View
+                    {/* <View
                         style={{
                             marginHorizontal: 12,
                             marginVertical: 5,
@@ -188,7 +188,7 @@ const HomeScreen = () => {
                                 Artist
                             </Text>
                         </Pressable>
-                    </View>
+                    </View> */}
 
                     <View style={{ height: 10 }} />
 
@@ -334,7 +334,7 @@ const HomeScreen = () => {
 export default HomeScreen
 
 const styles = StyleSheet.create({
-    container: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0, marginBottom: Platform.OS === 'android' ? 50 : 0 },
+    container: { flex: 1, marginBottom: Platform.OS === 'android' ? 50 : 0 },
     button: {
         backgroundColor: "#131624",
         paddingVertical: 10,

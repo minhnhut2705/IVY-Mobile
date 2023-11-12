@@ -44,6 +44,7 @@ const BottomTabs = () => {
                     ) : (<Ionicons name="musical-notes-outline" size={24} color="white" />)
                 }
             }} />
+
             <Tab.Screen name='Profile' component={ProfileScreen} options={{
                 tabBarLabel: 'Profile', headerShown: false, tabBarLabelStyle: { color: 'white' },
                 tabBarIcon: ({ focused }) => {

@@ -8,7 +8,7 @@ import { ProgressBar, MD3Colors } from 'react-native-paper';
 import axios from 'axios'
 import { baseUrl } from '../screens/LoginScreen';
 
-const defaultSong = {
+export const defaultSong = {
     _id: "641c50234ab39bd00e7c6d80",
     name: "Xuôi Dòng Cửu Long",
     thumbnail: "https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/img%2Fsongs%2FXu%C3%B4i%20D%C3%B2ng%20C%E1%BB%ADu%20Long.jpg?alt=media&token=dd95cc1b-28c1-4dd4-aaba-f7d54c826ae8",
@@ -40,7 +40,7 @@ export default function AudioPlayer() {
         try {
             const { sound: song, status } = await Audio.Sound.createAsync(
                 { uri: songURL }, // Replace with the path to your audio file
-                { shouldPlay: songURL != defaultSong.songURL }, (status) => {
+                { shouldPlay: false }, (status) => {
                     setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
                     // if (status.didJustFinish && songState.isRepeat) {
                     //     song.playAsync()
@@ -155,23 +155,10 @@ export default function AudioPlayer() {
         }
     };
 
-
-
-    // console.log('====================================');
-    // console.log("positionMillis / durationMillis", progress);
-    // console.log('====================================');
-    // React.useEffect(() => {
-    //     loadAudio();
-    //     return () => {
-    //         if (sound) {
-    //             sound.unloadAsync();
-    //         }
-    //     };
-    // }, []);
-
     React.useEffect(() => {
         getAllSongs()
     }, [])
+
     React.useEffect(() => {
         if (progress == 1) {
             if (songState.isRepeat) {
@@ -202,15 +189,6 @@ export default function AudioPlayer() {
             }
         };
     }, [songState.song?.songURL]);
-
-    // React.useEffect(() => {
-    //     return sound
-    //         ? () => {
-    //             console.log('Unloading Sound');
-    //             sound.unloadAsync();
-    //         }
-    //         : undefined;
-    // // }, [sound]);
 
     // const handleState = async () => {
     //     try {
@@ -249,16 +227,16 @@ export default function AudioPlayer() {
                 <View style={{ width: '15%' }}>
                     <Text numberOfLines={1} ellipsizeMode='tail' style={{ color: 'white' }}>{songState.song?.name}</Text>
                 </View>
-            <Pressable style={styles.icon} onPress={handleRandom}>
+                <Pressable style={styles.icon} onPress={handleRandom}>
                     <FontAwesome5 name="random" size={24} color={songState?.isRandom ? '#FD841F' : 'white'} />
-            </Pressable>
+                </Pressable>
                 <Pressable style={styles.icon} onPress={() => handleNextPreviousSong(allSongs[songState.index - 1], songState.index - 1)}>
-                <FontAwesome5 name="step-backward" size={24} color="white" />
-            </Pressable>
-            <Pressable style={styles.icon} onPress={handlePlayPause}>
+                    <FontAwesome5 name="step-backward" size={24} color="white" />
+                </Pressable>
+                <Pressable style={styles.icon} onPress={handlePlayPause}>
                     {songState?.isPlaying ? <FontAwesome5 name="pause" size={24} color="white" /> : < FontAwesome5 name="play" size={24} color="white" />
-                }
-            </Pressable>
+                    }
+                </Pressable>
                 <Pressable style={styles.icon} onPress={() => {
                     let index = songState.index + 1
                     if (songState.isRandom) {
@@ -270,11 +248,11 @@ export default function AudioPlayer() {
 
                     handleNextPreviousSong(allSongs[index], index)
                 }}>
-                <FontAwesome5 name="step-forward" size={24} color="white" />
-            </Pressable>
-            <Pressable style={styles.icon} onPress={handleRepeat} >
+                    <FontAwesome5 name="step-forward" size={24} color="white" />
+                </Pressable>
+                <Pressable style={styles.icon} onPress={handleRepeat} >
                     {songState?.isRepeat ? <MaterialIcons name="repeat-one" size={24} color="#FD841F" /> : <MaterialIcons name="repeat" size={24} color="white" />}
-            </Pressable>
+                </Pressable>
             </View>
             <View>
                 <ProgressBar progress={Number.isNaN(progress) ? 0 : progress} color={MD3Colors.error50} />
