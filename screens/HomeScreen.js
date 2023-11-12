@@ -54,7 +54,6 @@ const HomeScreen = () => {
     const getFavoriteSongs = async (favoriteSongsId) => {
         try {
             const response = await axios.post(`${baseUrl}/songs/getFavorites`, { favoriteSongsId: favoriteSongsId })
-
             setFavoriteSongs(response.data.songs)
         } catch (error) {
             console.log(error);
@@ -71,10 +70,6 @@ const HomeScreen = () => {
     const updateUserRecentlyPlayed = async (userId, songsPlayed) => {
         try {
             const response = await axios.patch(`${baseUrl}/users/updateRecentlyPlayed/${userId}`, { recentlyPlayed: songsPlayed })
-
-            console.log('====================================');
-            console.log("response.data.user", response.data.user.recentlyPlayed);
-            console.log('====================================');
             setCurrentUser(response.data.user)
         } catch (error) {
             console.log(error);
@@ -86,7 +81,6 @@ const HomeScreen = () => {
 
 
             console.log('====================================');
-            console.log("stream", stream);
             console.log("response.data.song.stream", response.data.song.stream);
             console.log('====================================');
         } catch (error) {
@@ -114,9 +108,6 @@ const HomeScreen = () => {
                 const playedSongs = currentUser.recentlyPlayed.includes(song._id) ? currentUser.recentlyPlayed : [...currentUser.recentlyPlayed, song._id]
 
                 await updateUserRecentlyPlayed(currentUser._id, playedSongs)
-                console.log('====================================');
-                console.log("song.stream + 1", song.stream + 1)
-                console.log('====================================');
                 await updateSongStream(song._id, song.stream + 1)
                 await getTopSongs(6)
             }
@@ -208,67 +199,17 @@ const HomeScreen = () => {
                             justifyContent: "space-between",
                         }}
                     >
-                        <Pressable
-                            onPress={() => navigation.navigate("Liked")}
+                        <Text
                             style={{
-                                marginBottom: 10,
-                                flexDirection: "row",
-                                alignItems: "center",
-                                gap: 10,
-                                flex: 1,
+                                color: "white",
+                                fontSize: 19,
+                                fontWeight: "bold",
                                 marginHorizontal: 10,
-                                marginVertical: 8,
-                                backgroundColor: "#202020",
-                                borderRadius: 4,
-                                elevation: 3,
+                                marginTop: 10,
                             }}
                         >
-                            <LinearGradient colors={["#33006F", "#FFFFFF"]}>
-                                <Pressable
-                                    style={{
-                                        width: 55,
-                                        height: 55,
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <AntDesign name="heart" size={24} color="white" />
-                                </Pressable>
-                            </LinearGradient>
-
-                            <Text style={{ color: "white", fontSize: 13, fontWeight: "bold" }}>
-                                Liked Songs
-                            </Text>
-                        </Pressable>
-
-                        <View
-                            style={{
-                                marginBottom: 10,
-                                flexDirection: "row",
-                                alignItems: "center",
-                                gap: 10,
-                                flex: 1,
-                                marginHorizontal: 10,
-                                marginVertical: 8,
-                                backgroundColor: "#202020",
-                                borderRadius: 4,
-                                elevation: 3,
-                            }}
-                        >
-                            <View>
-                                <Image
-                                    style={{ width: 55, height: 55 }}
-                                    source={{ uri: "https://via.placeholder.com/150/771796" }}
-                                />
-                            </View>
-                            <View style={styles.randomArtist}>
-                                <Text numberOfLines={2} ellipsizeMode="tail"
-                                    style={{ color: "white", fontSize: 13, fontWeight: "bold" }}
-                                >
-                                    Hiphop Tamhiza
-                                </Text>
-                            </View>
-                        </View>
+                            Top Songs
+                        </Text>
                     </View>
                     <FlatList
                         data={topSongs}
@@ -291,7 +232,26 @@ const HomeScreen = () => {
                         </Text>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                             {favoriteSongs.map((item, index) => (
-                                <SongSquareCard item={item} key={index} />
+                                <Pressable style={{ margin: 10 }} onPress={() => setSongState(prev => ({
+                                    ...prev,
+                                    song: item,
+                                    index: index
+                                }))} key={index}>
+                                    <Image
+                                        style={{ width: 130, height: 130, borderRadius: 5 }}
+                                        source={{ uri: item.thumbnail }}
+                                    />
+                                    <Text numberOfLines={1} ellipsizeMode="tail"
+                                        style={{
+                                            fontSize: 13,
+                                            fontWeight: "500",
+                                            color: "white",
+                                            marginTop: 10, width: 130
+                                        }}
+                                    >
+                                        {item?.name}
+                                    </Text>
+                                </Pressable>
                             ))}
                         </ScrollView>
                         <View style={{ height: 10 }} />
@@ -311,7 +271,34 @@ const HomeScreen = () => {
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         renderItem={({ item, index }) => (
-                            <RecentlyPlayedCard item={item} key={index} />
+                            <Pressable
+                                onPress={() =>
+                                    setSongState(prev => ({
+                                        ...prev,
+                                        song: item,
+                                        index: index
+                                    }))
+                                }
+                                style={{ margin: 10 }}
+                                key={index}
+                            >
+                                <Image
+                                    style={{ width: 130, height: 130, borderRadius: 5 }}
+                                    source={{ uri: item?.thumbnail }}
+                                />
+                                <Text
+                                    numberOfLines={1} ellipsizeMode="tail"
+                                    style={{
+                                        fontSize: 13,
+                                        width: 130,
+                                        fontWeight: "500",
+                                        color: "white",
+                                        marginTop: 10,
+                                    }}
+                                >
+                                    {item?.name}
+                                </Text>
+                            </Pressable>
                         )}
                         /> 
                     </>}

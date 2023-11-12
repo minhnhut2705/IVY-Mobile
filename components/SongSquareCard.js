@@ -1,9 +1,9 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, Pressable } from "react-native";
 import React from "react";
 
-const SongSquareCard = ({ item }) => {
+const SongSquareCard = ({ item, onPress }) => {
     return (
-        <View style={{ margin: 10 }}>
+        <Pressable style={{ margin: 10 }} onPress={onPress}>
             <Image
                 style={{ width: 130, height: 130, borderRadius: 5 }}
                 source={{ uri: item.thumbnail }}
@@ -18,7 +18,7 @@ const SongSquareCard = ({ item }) => {
             >
                 {item?.name}
             </Text>
-        </View>
+        </Pressable>
     );
 };
 

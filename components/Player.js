@@ -8,27 +8,43 @@ import { ProgressBar, MD3Colors } from 'react-native-paper';
 import axios from 'axios'
 import { baseUrl } from '../screens/LoginScreen';
 
+const defaultSong = {
+    _id: "641c50234ab39bd00e7c6d80",
+    name: "Xuôi Dòng Cửu Long",
+    thumbnail: "https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/img%2Fsongs%2FXu%C3%B4i%20D%C3%B2ng%20C%E1%BB%ADu%20Long.jpg?alt=media&token=dd95cc1b-28c1-4dd4-aaba-f7d54c826ae8",
+    banner: "https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/img%2Fsongs%2FXu%C3%B4i%20D%C3%B2ng%20C%E1%BB%ADu%20Long.jpg?alt=media&token=dd95cc1b-28c1-4dd4-aaba-f7d54c826ae8",
+    songURL: "https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/mp3%2FXu%C3%B4i%20D%C3%B2ng%20C%E1%BB%ADu%20Long.mp3?alt=media&token=b19d42bb-7668-4f85-bad9-76f43690b849",
+    artist: [
+        "641c58a94ab39bd00e7c6daa"
+    ],
+    stream: 1,
+    genres: [
+        "6364705f45683df115923736"
+    ],
+    type: "system",
+    createdAt: "2023-03-23T13:12:03.414Z"
+    ,
+    updatedAt: "2023-10-12T14:02:33.965Z"
+    ,
+    __v: 0
+}
+
 export default function AudioPlayer() {
     const [sound, setSound] = React.useState();
     const [allSongs, setAllSongs] = React.useState();
     const [songState, setSongState] = useAtom(songStateAtom)
     const [progress, setProgress] = React.useState(0);
 
-    const defaultSongUrl = 'https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/mp3%2FDemons1683259252539?alt=media&token=e5189d6a-5fa0-45fb-98ee-092f751d4089'
 
-    const loadAudio = async (songURL = defaultSongUrl) => {
+    const loadAudio = async (songURL = defaultSong.songURL) => {
         try {
             const { sound: song, status } = await Audio.Sound.createAsync(
                 { uri: songURL }, // Replace with the path to your audio file
-                { shouldPlay: songURL != defaultSongUrl }, (status) => {
+                { shouldPlay: songURL != defaultSong.songURL }, (status) => {
                     setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
-                    // console.log('====================================');
-                    // console.log(status.didJustFinish, status.isLooping, songState.isRepeat);
-                    // console.log('====================================');
-                    if (status.didJustFinish && songState.isRepeat) {
-
-                        song.playAsync()
-                    }
+                    // if (status.didJustFinish && songState.isRepeat) {
+                    //     song.playAsync()
+                    // }
                 }
             );
             await song.playAsync()
@@ -156,6 +172,24 @@ export default function AudioPlayer() {
     React.useEffect(() => {
         getAllSongs()
     }, [])
+    React.useEffect(() => {
+        if (progress == 1) {
+            if (songState.isRepeat) {
+                loadAudio(songState.song.songURL)
+            } else {
+                let index = songState.index + 1
+                if (songState.isRandom) {
+                    index = Math.floor(Math.random() * allSongs.length)
+                }
+                loadAudio(allSongs[index].songURL)
+                setSongState(prev => ({
+                    ...prev,
+                    song: allSongs[index],
+                    index: index
+                }))
+            }
+        }
+    }, [progress])
 
     React.useEffect(() => {
         if (sound) {
