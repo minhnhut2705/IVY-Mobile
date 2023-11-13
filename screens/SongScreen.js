@@ -1,48 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StatusBar, StyleSheet, Pressable, Image, ImageBackground, SafeAreaView } from 'react-native';
+import { View, Text, StatusBar, StyleSheet, Pressable, Image, ImageBackground, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient'
 import Slider from '@react-native-community/slider';
-import { songStateAtom } from '../store';
+import { songStateAtom, soundPlayingAtom } from '../store';
 import { useAtom } from 'jotai';
 import { defaultSong } from '../components/Player';
 import { MD3Colors } from 'react-native-paper';
 import { FontAwesome5, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import { baseUrl } from './LoginScreen';
+import { useNavigation } from '@react-navigation/native'
 
 const FloatingAudioPlayer = () => {
-    const [sound, setSound] = React.useState();
+    const [sound, setSound] = useAtom(soundPlayingAtom);
     const [allSongs, setAllSongs] = React.useState();
+    const [artistOfSong, setArtistOfSong] = React.useState();
     const [songState, setSongState] = useAtom(songStateAtom)
-    const [progress, setProgress] = React.useState(0);
-    const loadAudio = async (songURL = defaultSong.songURL) => {
-        try {
-            const { sound: song, status } = await Audio.Sound.createAsync(
-                { uri: songURL }, // Replace with the path to your audio file
-                { shouldPlay: false }, (status) => {
-                    setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
-                    // if (status.didJustFinish && songState.isRepeat) {
-                    //     song.playAsync()
-                    // }
-                }
-            );
-            await song.playAsync()
-            setSound(song);
-            setSongState(prev => ({
-                ...prev,
-                isPlaying: true
-
-            }))
-            // setdurationMillis(status.durationMillis / 1000)
-        } catch (error) {
-            console.log('====================================');
-            console.log(error);
-            console.log('====================================');
-        }
-    };
-
+    const navigation = useNavigation()
     const handlePlayPause = async () => {
         try {
-
             if (sound) {
                 const { isPlaying } = await sound.getStatusAsync();
                 if (isPlaying) {
@@ -72,7 +49,6 @@ const FloatingAudioPlayer = () => {
         }
     };
 
-
     const getAllSongs = async () => {
         try {
             const response = await axios.get(`${baseUrl}/songs`)
@@ -81,6 +57,22 @@ const FloatingAudioPlayer = () => {
             console.log(error);
         }
     }
+
+    const getArtistOfSong = async (artistId) => {
+        try {
+            console.log('====================================');
+            console.log("artistId", artistId);
+            console.log('====================================');
+            const response = await axios.get(`${baseUrl}/artists/${artistId}`)
+            console.log('====================================');
+            console.log("response.data.artistId", response.data.artist.name);
+            console.log('====================================');
+            setArtistOfSong(response.data.artist)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const handleRepeat = async () => {
         try {
             setSongState(prev => (
@@ -89,10 +81,7 @@ const FloatingAudioPlayer = () => {
                     isRepeat: !songState.isRepeat
                 }
             ))
-            const x = await sound?.setIsLoopingAsync(true)
-            console.log('====================================');
-            console.log("x", x);
-            console.log('====================================');
+
 
         } catch (error) {
             console.log('====================================');
@@ -133,14 +122,35 @@ const FloatingAudioPlayer = () => {
         }
     };
 
+    const convertTime = (time) => {
+        var minutes = Number(Math.floor(time / 60))
+        minutes = (minutes >= 10) ? minutes : "0" + (Number.isNaN(minutes) ? '0' : minutes)
+        var seconds = Math.floor(time % 60)
+        seconds = (seconds >= 10) ? seconds : "0" + (Number.isNaN(seconds) ? '0' : seconds)
+
+        console.log('====================================');
+        console.log("minutes", minutes, "seconds", seconds);
+        console.log('====================================');
+
+        return minutes + ':' + seconds
+    }
+
     React.useEffect(() => {
         getAllSongs()
     }, [])
 
     React.useEffect(() => {
-        if (progress == 1) {
+        getArtistOfSong(songState.song.artist[0])
+    }, [songState.song])
+
+    React.useEffect(() => {
+        if (songState.progress == 1) {
             if (songState.isRepeat) {
-                loadAudio(songState.song.songURL)
+                setSongState(prev => ({
+                    ...prev,
+                    song: allSongs[songState.index],
+                    index: songState.index
+                }))
             } else {
                 let index = songState.index + 1
                 if (songState.isRandom) {
@@ -154,19 +164,7 @@ const FloatingAudioPlayer = () => {
                 }))
             }
         }
-    }, [progress])
-
-    React.useEffect(() => {
-        if (sound) {
-            sound.unloadAsync();
-        }
-        loadAudio(songState.song?.songURL);
-        return () => {
-            if (sound) {
-                sound.unloadAsync();
-            }
-        };
-    }, [songState.song?.songURL]);
+    }, [songState.progress])
 
     React.useEffect(() => {
         // handleState()
@@ -181,24 +179,22 @@ const FloatingAudioPlayer = () => {
     return (
         <>
             <StatusBar style='light'></StatusBar>
-            {/* <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}> */}
             <SafeAreaView style={styles.container}>
-                <ImageBackground source={{ uri: defaultSong.thumbnail }} resizeMode="cover" style={styles.imageBackground} blurRadius={16}>
-                    <View
+                <ImageBackground source={{ uri: songState.song?.thumbnail }} resizeMode="cover" style={styles.imageBackground} blurRadius={16}>
+                    <Pressable
+                        onPress={() => navigation.navigate('Home')}
                         style={{
-                            // marginVertical: 5,
-                            marginLeft: 'auto',
-                            marginRight: 'auto',
                             flexDirection: "row",
+                            justifyContent: 'start',
                             alignItems: "center",
+                            paddingHorizontal: 10,
                             gap: 10,
                         }}
                     >
-                        <Ionicons name="arrow-back" size={36} color="black" />
-                    </View>
+                        <Ionicons name="arrow-back" size={36} color="white" />
+                    </Pressable>
                     <View
                         style={{
-                            // marginVertical: 5,
                             paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 16 : 0,
                             marginLeft: 'auto',
                             marginRight: 'auto',
@@ -207,12 +203,10 @@ const FloatingAudioPlayer = () => {
                             gap: 10,
                         }}
                     >
-                        <Image style={{ height: 380, width: 380, borderRadius: 12 }} source={{ uri: defaultSong.thumbnail }} />
+                        <Image style={{ height: 380, width: 380, borderRadius: 12 }} source={{ uri: songState.song?.thumbnail }} />
                     </View>
-
                     <View
                         style={{
-                            // marginVertical: 5,
                             marginLeft: 'auto',
                             marginRight: 'auto',
                             flexDirection: "row",
@@ -227,7 +221,7 @@ const FloatingAudioPlayer = () => {
                             marginHorizontal: 10,
                             marginTop: 10,
                         }}>
-                            {defaultSong.name}
+                            {songState.song?.name}
 
                         </Text>
                     </View>
@@ -248,8 +242,7 @@ const FloatingAudioPlayer = () => {
                             marginHorizontal: 10,
                             marginTop: 10,
                         }}>
-                            Diệu Kiên
-
+                            {artistOfSong?.name}
                         </Text>
                     </View>
                     <View style={{ height: 20 }} />
@@ -263,10 +256,10 @@ const FloatingAudioPlayer = () => {
                             gap: 10,
                         }}
                     >
-                        <Slider style={{ width: 380, height: 20, marginTop: 20 }}
+                        <Slider style={{ width: 380, height: 40, marginTop: 20 }}
                             minimumValue={0}
                             maximumValue={1}
-                            value={0.3}
+                            value={Number.isNaN(songState.progress) ? 0 : songState.progress}
                             onValueChange={(value) => console.log('Value:', value)}
                             step={0.01}
                             thumbTintColor={MD3Colors.error50}
@@ -277,13 +270,13 @@ const FloatingAudioPlayer = () => {
 
                     <View
                         style={{
-                            // marginVertical: 5,
                             marginLeft: 'auto',
                             marginRight: 'auto',
                             flexDirection: "row",
                             justifyContent: 'space-between',
                             alignItems: "space-between",
                             gap: 10,
+                            marginBottom: 30,
                             width: 380
                         }}
                     >
@@ -291,17 +284,15 @@ const FloatingAudioPlayer = () => {
                             color: "white",
                             fontSize: 19,
                             fontWeight: "bold",
-                            marginHorizontal: 10,
                         }}>
-                            01:35
+                            {convertTime(songState.currentTime / 1000)}
                         </Text>
                         <Text style={{
                             color: "white",
                             fontSize: 19,
                             fontWeight: "bold",
-                            marginHorizontal: 10,
                         }}>
-                            04:25
+                            {convertTime(songState.durationTime / 1000)}
                         </Text>
                     </View>
 
@@ -322,7 +313,7 @@ const FloatingAudioPlayer = () => {
                         <Pressable style={styles.icon} onPress={handleRandom}>
                             <FontAwesome5 name="random" size={36} color={songState?.isRandom ? '#FD841F' : 'white'} />
                         </Pressable>
-                        <Pressable style={styles.icon} onPress={() => handleNextPreviousSong(allSongs[songState.index - 1], songState.index - 1)}>
+                        <Pressable style={styles.icon} onPress={() => handleNextPreviousSong(allSongs[Number(songState.index) - 1], Number(songState.index) - 1)}>
                             <FontAwesome5 name="step-backward" size={36} color="white" />
                         </Pressable>
                         <Pressable style={styles.playPauseButton} onPress={handlePlayPause}>
@@ -335,10 +326,10 @@ const FloatingAudioPlayer = () => {
                                 index = Math.floor(Math.random() * allSongs.length)
                             }
                             console.log('====================================');
-                            console.log("index", index);
+                            console.log("index", allSongs);
                             console.log('====================================');
 
-                            handleNextPreviousSong(allSongs[index], index)
+                            handleNextPreviousSong(allSongs[Number(index)], Number(index))
                         }}>
                             <FontAwesome5 name="step-forward" size={36} color="white" />
                         </Pressable>
@@ -348,7 +339,6 @@ const FloatingAudioPlayer = () => {
                     </View>
                 </ImageBackground>
             </SafeAreaView>
-            {/* </LinearGradient > */}
         </>
     );
 };

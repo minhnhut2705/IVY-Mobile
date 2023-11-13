@@ -12,7 +12,6 @@ import { currentUserAtom, songStateAtom } from '../store';
 import { useAtom } from 'jotai';
 import Header from '../components/Header';
 import AudioPlayer from '../components/Player';
-import SongSquareCard from '../components/SongSquareCard';
 
 const HomeScreen = () => {
     const navigation = useNavigation()
@@ -109,7 +108,7 @@ const HomeScreen = () => {
 
                 await updateUserRecentlyPlayed(currentUser._id, playedSongs)
                 await updateSongStream(song._id, song.stream + 1)
-                await getTopSongs(6)
+                // await getTopSongs(6)
             }
         } catch (error) {
             console.log(error, "x");

@@ -3,37 +3,16 @@ import { Text, View, StyleSheet, Button, Pressable } from 'react-native';
 import { Audio } from 'expo-av';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { useAtom } from 'jotai';
-import { songStateAtom, playingSongAtom } from '../store';
+import { songStateAtom, soundPlayingAtom } from '../store';
 import { ProgressBar, MD3Colors } from 'react-native-paper';
 import axios from 'axios'
 import { baseUrl } from '../screens/LoginScreen';
-
-export const defaultSong = {
-    _id: "641c50234ab39bd00e7c6d80",
-    name: "Xuôi Dòng Cửu Long",
-    thumbnail: "https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/img%2Fsongs%2FXu%C3%B4i%20D%C3%B2ng%20C%E1%BB%ADu%20Long.jpg?alt=media&token=dd95cc1b-28c1-4dd4-aaba-f7d54c826ae8",
-    banner: "https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/img%2Fsongs%2FXu%C3%B4i%20D%C3%B2ng%20C%E1%BB%ADu%20Long.jpg?alt=media&token=dd95cc1b-28c1-4dd4-aaba-f7d54c826ae8",
-    songURL: "https://firebasestorage.googleapis.com/v0/b/athena-4d002.appspot.com/o/mp3%2FXu%C3%B4i%20D%C3%B2ng%20C%E1%BB%ADu%20Long.mp3?alt=media&token=b19d42bb-7668-4f85-bad9-76f43690b849",
-    artist: [
-        "641c58a94ab39bd00e7c6daa"
-    ],
-    stream: 1,
-    genres: [
-        "6364705f45683df115923736"
-    ],
-    type: "system",
-    createdAt: "2023-03-23T13:12:03.414Z"
-    ,
-    updatedAt: "2023-10-12T14:02:33.965Z"
-    ,
-    __v: 0
-}
+import { defaultSong } from '../store';
 
 export default function AudioPlayer() {
-    const [sound, setSound] = React.useState();
     const [allSongs, setAllSongs] = React.useState();
     const [songState, setSongState] = useAtom(songStateAtom)
-    const [progress, setProgress] = React.useState(0);
+    const [sound, setSound] = useAtom(soundPlayingAtom)
 
 
     const loadAudio = async (songURL = defaultSong.songURL) => {
@@ -41,7 +20,14 @@ export default function AudioPlayer() {
             const { sound: song, status } = await Audio.Sound.createAsync(
                 { uri: songURL }, // Replace with the path to your audio file
                 { shouldPlay: false }, (status) => {
-                    setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
+                    setSongState(prev => ({
+                        ...prev,
+                        progress: Number((status.positionMillis / status.durationMillis).toFixed(3)),
+                        currentTime: Number((status.positionMillis)),
+                        durationTime: Number((status.durationMillis)),
+                        isPlaying: true,
+                    }))
+                    // setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
                     // if (status.didJustFinish && songState.isRepeat) {
                     //     song.playAsync()
                     // }
@@ -160,7 +146,7 @@ export default function AudioPlayer() {
     }, [])
 
     React.useEffect(() => {
-        if (progress == 1) {
+        if (songState.progress == 1) {
             if (songState.isRepeat) {
                 loadAudio(songState.song.songURL)
             } else {
@@ -176,7 +162,7 @@ export default function AudioPlayer() {
                 }))
             }
         }
-    }, [progress])
+    }, [songState.progress])
 
     React.useEffect(() => {
         if (sound) {
@@ -255,7 +241,7 @@ export default function AudioPlayer() {
                 </Pressable>
             </View>
             <View>
-                <ProgressBar progress={Number.isNaN(progress) ? 0 : progress} color={MD3Colors.error50} />
+                <ProgressBar progress={Number.isNaN(songState.progress) ? 0 : songState.progress} color={MD3Colors.error50} />
             </View>
 
         </View>
