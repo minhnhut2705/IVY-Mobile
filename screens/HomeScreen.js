@@ -1,4 +1,4 @@
-import { StyleSheet, Image, Text, View, FlatList, StatusBar, Platform, Pressable, ScrollView, SafeAreaView } from 'react-native'
+import { StyleSheet, Image, Text, View, FlatList, StatusBar, Platform, Pressable, ScrollView, SafeAreaView, } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from '@react-navigation/native'
@@ -12,7 +12,8 @@ import { currentUserAtom, songStateAtom } from '../store';
 import { useAtom } from 'jotai';
 import Header from '../components/Header';
 import AudioPlayer from '../components/Player';
-
+import GenreCard from '../components/GenreCard'
+import { MD3Colors } from 'react-native-paper';
 const HomeScreen = () => {
     const navigation = useNavigation()
     const [topSongs, setTopSongs] = React.useState([])
@@ -20,12 +21,16 @@ const HomeScreen = () => {
     const [favoriteSongs, setFavoriteSongs] = React.useState([])
     const [recentlyPlayedSongs, setRecentlyPlayedSongs] = React.useState([])
     const [topArtists, setTopArtists] = React.useState([])
+    const [allGenres, setAllGenres] = React.useState([])
+    const [allPlaylists, setAllPlaylists] = React.useState([])
     const [songState, setSongState] = useAtom(songStateAtom)
     const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
 
     React.useEffect(() => {
         getTopSongs(6)
         geTopArtists(6)
+        getAllGenres()
+        getAllPlaylists()
     }, [])
 
     React.useEffect(() => {
@@ -46,6 +51,22 @@ const HomeScreen = () => {
         try {
             const response = await axios.post(`${baseUrl}/songs`, { numOfSong: numOfSong })
             setTopSongs(response.data.songs)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const getAllGenres = async () => {
+        try {
+            const response = await axios.get(`${baseUrl}/genres`)
+            setAllGenres(response.data.genres)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const getAllPlaylists = async () => {
+        try {
+            const response = await axios.get(`${baseUrl}/playlists`)
+            setAllPlaylists(response.data.playlists)
         } catch (error) {
             console.log(error);
         }
@@ -118,16 +139,7 @@ const HomeScreen = () => {
     const renderSong = ({ item, index }) => {
         return (
             <Pressable
-                style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    marginHorizontal: 10,
-                    marginVertical: 8,
-                    backgroundColor: "#282828",
-                    borderRadius: 4,
-                    elevation: 3,
-                }}
+                style={({ pressed }) => pressed ? styles.topSongsItemPressed : styles.topSongsItem}
 
                 onPress={() => setPlayingSong(item, index)}
             >
@@ -288,6 +300,43 @@ const HomeScreen = () => {
                             <ArtistCard item={item} key={index} />
                         )}
                     />
+                    <Text
+                        style={{
+                            color: "white",
+                            fontSize: 19,
+                            fontWeight: "bold",
+                            marginHorizontal: 10,
+                            marginTop: 10,
+                        }}
+                    >
+                        Genres
+                    </Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 10, }}>
+                        {
+                            allGenres.map((item, index) => (
+                                <GenreCard item={item} key={index} />
+                            ))
+                        }
+                    </View>
+                    <View style={{ height: 10 }} />
+                    <Text
+                        style={{
+                            color: "white",
+                            fontSize: 19,
+                            fontWeight: "bold",
+                            marginHorizontal: 10,
+                            marginTop: 10,
+                        }}
+                    >
+                        Playlists
+                    </Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 10, }}>
+                        {
+                            allPlaylists.map((item, index) => (
+                                <GenreCard item={item} key={index} />
+                            ))
+                        }
+                    </View>
                     <View style={{ height: 10 }} />
                 </ScrollView >
                 <AudioPlayer></AudioPlayer>
@@ -330,5 +379,25 @@ const styles = StyleSheet.create({
         fontWeight: "500",
         color: 'white',
         textAlign: 'center'
+    },
+    topSongsItem: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginHorizontal: 10,
+        marginVertical: 8,
+        backgroundColor: "#282828",
+        borderRadius: 4,
+        elevation: 3,
+    },
+    topSongsItemPressed: {
+        flex: 1,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginHorizontal: 10,
+        marginVertical: 8,
+        backgroundColor: MD3Colors.error50,
+        borderRadius: 4,
+        elevation: 3,
     }
 })

@@ -8,6 +8,7 @@ import { baseUrl } from '../screens/LoginScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { currentUserAtom, songStateAtom } from '../store';
 import { useAtom } from 'jotai';
+import { MD3Colors } from 'react-native-paper'
 
 export default function Header() {
     const navigation = useNavigation()
@@ -24,10 +25,10 @@ export default function Header() {
     const handleLogout = async () => {
         await AsyncStorage.removeItem('jwt')
         setCurrentUser(null)
-        setSongState((prev) => ({
-            ...prev,
-            isPlaying: false
-        }))
+        // setSongState((prev) => ({
+        //     ...prev,
+        //     isPlaying: false
+        // }))
         // navigation.navigate('Login')
     }
 
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
         marginVertical: 10
     },
     buttonPressed: {
-        backgroundColor: "green",
+        backgroundColor: MD3Colors.error50,
         paddingVertical: 10,
         width: 150,
         borderRadius: 10,
