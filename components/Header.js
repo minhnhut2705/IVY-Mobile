@@ -6,20 +6,29 @@ import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons"
 import axios from 'axios';
 import { baseUrl } from '../screens/LoginScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { currentUserAtom } from '../store';
+import { currentUserAtom, songStateAtom } from '../store';
 import { useAtom } from 'jotai';
 
 export default function Header() {
     const navigation = useNavigation()
     const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
+    const [songState, setSongState] = useAtom(songStateAtom)
 
     const handleAuthentication = async () => {
+        setSongState((prev) => ({
+            ...prev,
+            isPlaying: false
+        }))
         navigation.navigate('Login')
     }
     const handleLogout = async () => {
         await AsyncStorage.removeItem('jwt')
         setCurrentUser(null)
-        navigation.navigate('Login')
+        setSongState((prev) => ({
+            ...prev,
+            isPlaying: false
+        }))
+        // navigation.navigate('Login')
     }
 
 

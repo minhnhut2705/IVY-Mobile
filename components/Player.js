@@ -19,28 +19,36 @@ export default function AudioPlayer() {
         try {
             const { sound: song, status } = await Audio.Sound.createAsync(
                 { uri: songURL }, // Replace with the path to your audio file
-                { shouldPlay: false }, (status) => {
-                    setSongState(prev => ({
-                        ...prev,
-                        progress: Number((status.positionMillis / status.durationMillis).toFixed(3)),
-                        currentTime: Number((status.positionMillis)),
-                        durationTime: Number((status.durationMillis)),
-                        isPlaying: true,
-                    }))
-                    // setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
-                    // if (status.didJustFinish && songState.isRepeat) {
-                    //     song.playAsync()
-                    // }
-                }
+                { shouldPlay: true },
+                // (status) => {
+                //     console.log("loadAudio");
+                //     setSongState(prev => ({
+                //         ...prev,
+                //         progress: Number((status.positionMillis / status.durationMillis).toFixed(3)),
+                //         currentTime: Number((status.positionMillis)),
+                //         durationTime: Number((status.durationMillis)),
+                //         isPlaying: true,
+                //     }))
+                //     // setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
+                //     // if (status.didJustFinish && songState.isRepeat) {
+                //     //     song.playAsync()
+                //     // }
+                // }
             );
+
+            song.setOnPlaybackStatusUpdate((sng) => setSongState(prev => ({
+                ...prev,
+                progress: Number((sng.positionMillis / sng.durationMillis).toFixed(3)),
+                currentTime: Number((sng.positionMillis)),
+                durationTime: Number((sng.durationMillis)),
+            })))
+
             await song.playAsync()
             setSound(song);
             setSongState(prev => ({
                 ...prev,
                 isPlaying: true
-
             }))
-            // setdurationMillis(status.durationMillis / 1000)
         } catch (error) {
             console.log('====================================');
             console.log(error);
@@ -50,15 +58,15 @@ export default function AudioPlayer() {
 
     const handlePlayPause = async () => {
         try {
-
             if (sound) {
                 const { isPlaying } = await sound.getStatusAsync();
+                console.log("handlePlayPause");
                 if (isPlaying) {
                     await sound.pauseAsync();
                     setSongState(prev => (
                         {
                             ...prev,
-                            isPlaying: false
+                            isPlaying: !isPlaying
                         }
                     ))
                 } else {
@@ -66,11 +74,24 @@ export default function AudioPlayer() {
                     setSongState(prev => (
                         {
                             ...prev,
-                            isPlaying: true
+                            isPlaying: !isPlaying
                         }
                     ))
-
-
+                }
+            }
+        } catch (error) {
+            console.log('====================================');
+            console.log(error);
+            console.log('====================================');
+        }
+    };
+    const handleSongState = async (state = true | false) => {
+        try {
+            if (sound) {
+                if (!state) {
+                    await sound.pauseAsync();
+                } else {
+                    await sound.playAsync()
                 }
             }
         } catch (error) {
@@ -98,10 +119,6 @@ export default function AudioPlayer() {
                 }
             ))
             const x = await sound?.setIsLoopingAsync(true)
-            console.log('====================================');
-            console.log("x", x);
-            console.log('====================================');
-
         } catch (error) {
             console.log('====================================');
             console.log(error);
@@ -118,6 +135,8 @@ export default function AudioPlayer() {
                     isRandom: !songState.isRandom
                 }
             ))
+            console.log("handleRandom");
+
         } catch (error) {
             console.log('====================================');
             console.log(error);
@@ -176,27 +195,22 @@ export default function AudioPlayer() {
         };
     }, [songState.song?.songURL]);
 
-    // const handleState = async () => {
-    //     try {
-    //         if (sound) {
-    //             const { isPlaying } = await sound.getStatusAsync();
-    //             if (isPlaying) {
-    //                 setSongState(draft => {
-    //                     draft.isPlaying = false
-    //                 })
-    //             } else {
-    //                 setSongState({ ...songState, isPlaying: false })
-
-    //             }
-    //         }
-    //     } catch (error) {
-    //         console.log('====================================');
-    //         console.log(error);
-    //         console.log('====================================');
-    //     }
-    // }
     React.useEffect(() => {
-        // handleState()
+        try {
+            if (!songState.isPlaying) {
+                sound.pauseAsync()
+            } else {
+                sound.playAsync()
+            }
+        } catch (error) {
+            console.log('====================================');
+            console.log(error);
+            console.log('====================================');
+        }
+
+    }, [songState.isPlaying]);
+
+    React.useEffect(() => {
         return sound
             ? () => {
                 console.log('Unloading Sound');
@@ -204,6 +218,7 @@ export default function AudioPlayer() {
             }
             : undefined;
     }, [sound]);
+
 
     return (
 
@@ -228,9 +243,6 @@ export default function AudioPlayer() {
                     if (songState.isRandom) {
                         index = Math.floor(Math.random() * allSongs.length)
                     }
-                    console.log('====================================');
-                    console.log("index", index);
-                    console.log('====================================');
 
                     handleNextPreviousSong(allSongs[index], index)
                 }}>

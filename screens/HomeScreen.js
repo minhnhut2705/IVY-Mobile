@@ -77,8 +77,6 @@ const HomeScreen = () => {
     const updateSongStream = async (songId, stream) => {
         try {
             const response = await axios.patch(`${baseUrl}/songs/update/${songId}/stream`, { stream: stream })
-
-
             console.log('====================================');
             console.log("response.data.song.stream", response.data.song.stream);
             console.log('====================================');
@@ -157,38 +155,6 @@ const HomeScreen = () => {
             <SafeAreaView style={styles.container}>
                 <ScrollView style={{ marginBottom: Platform.OS == 'android' ? 70 : 0 }}>
                     <Header></Header>
-                    {/* <View
-                        style={{
-                            marginHorizontal: 12,
-                            marginVertical: 5,
-                            flexDirection: "row",
-                            alignItems: "center",
-                            gap: 10,
-                        }}
-                    >
-                        <Pressable
-                            style={{
-                                backgroundColor: "#282828",
-                                padding: 10,
-                                borderRadius: 30,
-                            }}
-                        >
-                            <Text style={{ fontSize: 15, color: "white" }}>Music</Text>
-                        </Pressable>
-
-                        <Pressable
-                            style={{
-                                backgroundColor: "#282828",
-                                padding: 10,
-                                borderRadius: 30,
-                            }}
-                        >
-                            <Text style={{ fontSize: 15, color: "white" }}>
-                                Artist
-                            </Text>
-                        </Pressable>
-                    </View> */}
-
                     <View style={{ height: 10 }} />
 
                     <View

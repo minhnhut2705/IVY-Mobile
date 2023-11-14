@@ -60,19 +60,24 @@ const FloatingAudioPlayer = () => {
 
     const getArtistOfSong = async (artistId) => {
         try {
-            console.log('====================================');
-            console.log("artistId", artistId);
-            console.log('====================================');
             const response = await axios.get(`${baseUrl}/artists/${artistId}`)
-            console.log('====================================');
-            console.log("response.data.artistId", response.data.artist.name);
-            console.log('====================================');
             setArtistOfSong(response.data.artist)
         } catch (error) {
             console.log(error);
         }
     }
 
+    const handlePositionOfSong = async (position) => {
+        try {
+            if (sound) {
+                await sound.setPositionAsync(position * songState.durationTime)
+            }
+        } catch (error) {
+            console.log('====================================');
+            console.log(error);
+            console.log('====================================');
+        }
+    };
     const handleRepeat = async () => {
         try {
             setSongState(prev => (
@@ -124,13 +129,9 @@ const FloatingAudioPlayer = () => {
 
     const convertTime = (time) => {
         var minutes = Number(Math.floor(time / 60))
-        minutes = (minutes >= 10) ? minutes : "0" + (Number.isNaN(minutes) ? '0' : minutes)
+        minutes = (Number(minutes) >= 10) ? minutes : "0" + (Number.isNaN(minutes) ? '0' : minutes)
         var seconds = Math.floor(time % 60)
-        seconds = (seconds >= 10) ? seconds : "0" + (Number.isNaN(seconds) ? '0' : seconds)
-
-        console.log('====================================');
-        console.log("minutes", minutes, "seconds", seconds);
-        console.log('====================================');
+        seconds = (Number(seconds) >= 10) ? seconds : "0" + (Number.isNaN(seconds) ? '0' : seconds)
 
         return minutes + ':' + seconds
     }
@@ -156,7 +157,6 @@ const FloatingAudioPlayer = () => {
                 if (songState.isRandom) {
                     index = Math.floor(Math.random() * allSongs.length)
                 }
-                loadAudio(allSongs[index].songURL)
                 setSongState(prev => ({
                     ...prev,
                     song: allSongs[index],
@@ -177,7 +177,7 @@ const FloatingAudioPlayer = () => {
     }, [sound]);
 
     return (
-        <>
+        songState.song._id && <>
             <StatusBar style='light'></StatusBar>
             <SafeAreaView style={styles.container}>
                 <ImageBackground source={{ uri: songState.song?.thumbnail }} resizeMode="cover" style={styles.imageBackground} blurRadius={16}>
@@ -235,12 +235,14 @@ const FloatingAudioPlayer = () => {
                             gap: 10,
                         }}
                     >
-                        <Text style={{
+                        <Text numberOfLines={2} ellipsizeMode='tail' style={{
                             color: "white",
                             fontSize: 14,
                             fontWeight: "light",
                             marginHorizontal: 10,
                             marginTop: 10,
+                            textAlign: "center",
+                            justifyContent: 'center'
                         }}>
                             {artistOfSong?.name}
                         </Text>
@@ -260,11 +262,13 @@ const FloatingAudioPlayer = () => {
                             minimumValue={0}
                             maximumValue={1}
                             value={Number.isNaN(songState.progress) ? 0 : songState.progress}
-                            onValueChange={(value) => console.log('Value:', value)}
-                            step={0.01}
+                            onValueChange={(value) => handlePositionOfSong(value)}
+                            step={0.0001}
                             thumbTintColor={MD3Colors.error50}
                             minimumTrackTintColor={MD3Colors.error50}
                             maximumTrackTintColor={MD3Colors.tertiary90}
+                            lowerLimit={0}
+                            upperLimit={1}
                         />
                     </View>
 
@@ -347,7 +351,8 @@ const styles = StyleSheet.create({
     container: { 
         flex: 1,
         // paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-        marginBottom: Platform.OS === 'android' ? 50 : 0,
+        marginBottom: Platform.OS === 'android' ? 50 : 0, 
+        backgroundColor: 'black',
     },
     playPauseButton: {
         backgroundColor: MD3Colors.secondary80,
