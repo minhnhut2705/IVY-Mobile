@@ -13,6 +13,7 @@ import { useAtom } from 'jotai';
 import Header from '../components/Header';
 import AudioPlayer from '../components/Player';
 import GenreCard from '../components/GenreCard'
+import PlaylistCard from '../components/PlaylistCard'
 import { MD3Colors } from 'react-native-paper';
 const HomeScreen = () => {
     const navigation = useNavigation()
@@ -188,12 +189,16 @@ const HomeScreen = () => {
                             Top Songs
                         </Text>
                     </View>
+                    <ScrollView >
                     <FlatList
                         data={topSongs}
                         renderItem={renderSong}
                         numColumns={2}
                         columnWrapperStyle={{ justifyContent: "space-between" }}
+                            showsHorizontalScrollIndicator={false}
+                            scrollEnabled={false}
                     />
+                    </ScrollView>
 
                     {currentUser && <>
                         <Text
@@ -243,41 +248,44 @@ const HomeScreen = () => {
                     >
                         Recently Played
                     </Text>
-                    <FlatList
-                            data={recentlyPlayedSongs}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        renderItem={({ item, index }) => (
-                            <Pressable
-                                onPress={() =>
-                                    setSongState(prev => ({
-                                        ...prev,
-                                        song: item,
-                                        index: index
-                                    }))
-                                }
-                                style={{ margin: 10 }}
-                                key={index}
-                            >
-                                <Image
-                                    style={{ width: 130, height: 130, borderRadius: 5 }}
-                                    source={{ uri: item?.thumbnail }}
-                                />
-                                <Text
-                                    numberOfLines={1} ellipsizeMode="tail"
-                                    style={{
-                                        fontSize: 13,
-                                        width: 130,
-                                        fontWeight: "500",
-                                        color: "white",
-                                        marginTop: 10,
-                                    }}
-                                >
-                                    {item?.name}
-                                </Text>
-                            </Pressable>
-                        )}
-                        /> 
+                        <ScrollView horizontal={true}>
+                            <FlatList
+                                data={recentlyPlayedSongs}
+                                horizontal
+                                showsHorizontalScrollIndicator={false}
+                                scrollEnabled={false}
+                                renderItem={({ item, index }) => (
+                                    <Pressable
+                                        onPress={() =>
+                                            setSongState(prev => ({
+                                                ...prev,
+                                                song: item,
+                                                index: index
+                                            }))
+                                        }
+                                        style={{ margin: 10 }}
+                                        key={index}
+                                    >
+                                        <Image
+                                            style={{ width: 130, height: 130, borderRadius: 5 }}
+                                            source={{ uri: item?.thumbnail }}
+                                        />
+                                        <Text
+                                            numberOfLines={1} ellipsizeMode="tail"
+                                            style={{
+                                                fontSize: 13,
+                                                width: 130,
+                                                fontWeight: "500",
+                                                color: "white",
+                                                marginTop: 10,
+                                            }}
+                                        >
+                                            {item?.name}
+                                        </Text>
+                                    </Pressable>
+                                )}
+                            /> 
+                        </ScrollView>
                     </>}
 
                     <View style={{ height: 10 }} />
@@ -292,14 +300,33 @@ const HomeScreen = () => {
                     >
                         Top Artists
                     </Text>
+                    <ScrollView horizontal={true}>
                     <FlatList
                         data={topArtists}
                         horizontal
                         showsHorizontalScrollIndicator={false}
+                            scrollEnabled={false}
                         renderItem={({ item, index }) => (
-                            <ArtistCard item={item} key={index} />
+                            <Pressable style={{ margin: 10 }} onPress={() => navigation.navigate('Artist', { artistId: item._id })}>
+                                <Image
+                                    style={{ width: 130, height: 130, borderRadius: 5 }}
+                                    source={{ uri: item.avatar }}
+                                />
+                                <Text numberOfLines={1} ellipsizeMode="tail"
+                                    style={{
+                                        fontSize: 13,
+                                        fontWeight: "500",
+                                        color: "white",
+                                        marginTop: 10, width: 130
+                                    }}
+                                >
+                                    {item?.name}
+                                </Text>
+                            </Pressable>
                         )}
                     />
+                    </ScrollView>
+
                     <Text
                         style={{
                             color: "white",
@@ -333,7 +360,7 @@ const HomeScreen = () => {
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 10, }}>
                         {
                             allPlaylists.map((item, index) => (
-                                <GenreCard item={item} key={index} />
+                                <PlaylistCard item={item} key={index} />
                             ))
                         }
                     </View>

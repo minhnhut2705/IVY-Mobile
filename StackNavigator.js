@@ -6,6 +6,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from './screens/LoginScreen';
 import SongScreen from './screens/SongScreen';
+import ArtistScreen from './screens/ArtistScreen';
+import { MD3Colors } from 'react-native-paper';
 const Tab = createBottomTabNavigator()
 
 const BottomTabs = () => {
@@ -32,27 +34,35 @@ const BottomTabs = () => {
                 tabBarLabel: 'Home', headerShown: false, tabBarLabelStyle: { color: 'white' },
                 tabBarIcon: ({ focused }) => {
                     return focused ? (
-                        <Entypo name="home" size={24} color="white" />
-                    ) : (<AntDesign name="home" size={24} color="white" />)
+                        <Entypo name="home" size={24} color={MD3Colors.error50} />
+                    ) : (<Entypo name="home" size={24} color="white" />)
                 }
             }} />
             <Tab.Screen name='Song' component={SongScreen} options={{
                 tabBarLabel: 'Song', headerShown: false, tabBarLabelStyle: { color: 'white' },
                 tabBarIcon: ({ focused }) => {
                     return focused ? (
-                        <Ionicons name="musical-notes" size={24} color="white" />
-                    ) : (<Ionicons name="musical-notes-outline" size={24} color="white" />)
+                        <Ionicons name="musical-notes" size={24} color={MD3Colors.error50} />
+                    ) : (<Ionicons name="musical-notes" size={24} color="white" />)
                 }
             }} />
-
+            <Tab.Screen name='Artist' component={ArtistScreen} options={{
+                tabBarLabel: 'Artist', headerShown: false, tabBarLabelStyle: { color: 'white' },
+                tabBarIcon: ({ focused }) => {
+                    return focused ? (
+                        <FontAwesome5 name="diagnoses" size={24} color={MD3Colors.error50} />
+                    ) : (<FontAwesome5 name="diagnoses" size={24} color='white' />)
+                }
+            }} />
             <Tab.Screen name='Profile' component={ProfileScreen} options={{
                 tabBarLabel: 'Profile', headerShown: false, tabBarLabelStyle: { color: 'white' },
                 tabBarIcon: ({ focused }) => {
                     return focused ? (
-                        <Ionicons name="person" size={24} color="white" />
-                    ) : (<Ionicons name="person-outline" size={24} color="white" />)
+                        <Ionicons name="person" size={24} color={MD3Colors.error50} />
+                    ) : (<Ionicons name="person" size={24} color="white" />)
                 }
             }} />
+
 
         </Tab.Navigator>
     )
