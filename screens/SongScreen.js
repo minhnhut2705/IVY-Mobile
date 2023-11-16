@@ -111,15 +111,27 @@ const FloatingAudioPlayer = () => {
         }
     };
 
+    const updateSongStream = async (song) => {
+        try {
+            const response = await axios.post(`${baseUrl}/songs/update/${song._id}/stream`, { song: song })
+            return response
+        } catch (error) {
+            console.log(error);
+            return null
+        }
+    }
+
     const handleNextPreviousSong = async (song, index) => {
         try {
+            const response = await updateSongStream({ ...song, stream: song.stream + 1 })
             setSongState(prev => (
                 {
                     ...prev,
-                    song: song,
+                    song: response.data.song,
                     index: index
                 }
             ))
+
         } catch (error) {
             console.log('====================================');
             console.log(error);
@@ -329,10 +341,6 @@ const FloatingAudioPlayer = () => {
                             if (songState.isRandom) {
                                 index = Math.floor(Math.random() * allSongs.length)
                             }
-                            console.log('====================================');
-                            console.log("index", allSongs);
-                            console.log('====================================');
-
                             handleNextPreviousSong(allSongs[Number(index)], Number(index))
                         }}>
                             <FontAwesome5 name="step-forward" size={36} color="white" />

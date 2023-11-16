@@ -16,32 +16,35 @@ import GenreCard from '../components/GenreCard'
 import PlaylistCard from '../components/PlaylistCard'
 import { MD3Colors } from 'react-native-paper';
 import _ from 'lodash'
-const ArtistScreen = ({ route }) => {
+const PlaylistScreen = ({ route }) => {
     const [topSongs, setTopSongs] = React.useState([])
     const [allSongs, setAllSongs] = React.useState([])
-    const [artistOfSong, setArtistOfSong] = React.useState();
+    const [playlist, setPlaylist] = React.useState();
     const [songState, setSongState] = useAtom(songStateAtom)
     const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
 
-    const artistId = route.params?.artistId ? route.params.artistId : songState.song.artist[0]
+    const playlistId = route.params?.playlistId ? route.params.playlistId : '641c32462b9ae59914e8a5fd'
 
     React.useEffect(() => {
-        if (artistId) {
-            getArtistOfSong(artistId)
+        if (playlistId) {
+            getPlaylistById(playlistId)
         } else {
-            getArtistOfSong(songState.song.artist[0])
+            getPlaylistById(songState.song.artist[0])
         }
-    }, [artistId])
+    }, [playlistId])
     React.useEffect(() => {
-        if (artistOfSong) {
-            getSongsByArrayOfId(artistOfSong?.songs)
+        if (playlist) {
+            getSongsByArrayOfId(playlist?.songs)
         }
-    }, [artistOfSong])
+    }, [playlist])
 
-    const getArtistOfSong = async (artistId) => {
+    const getPlaylistById = async (playlistId) => {
         try {
-            const response = await axios.get(`${baseUrl}/artists/${artistId}`)
-            setArtistOfSong(response.data.artist)
+            const response = await axios.get(`${baseUrl}/playlists/${playlistId}`)
+            console.log('====================================');
+            console.log(response.data.playlist);
+            console.log('====================================');
+            setPlaylist(response.data.playlist)
         } catch (error) {
             console.log(error);
         }
@@ -149,7 +152,7 @@ const ArtistScreen = ({ route }) => {
                     >
                         <Image
                             style={{ height: 120, width: 120, borderRadius: 10, marginRight: 10, borderColor: MD3Colors.neutralVariant50, borderWidth: 1 }}
-                            source={{ uri: artistOfSong?.avatar }}
+                            source={{ uri: playlist?.thumbnail }}
                         />
                         <View style={{ justifyContent: 'space-around', flexDirection: 'column' }}>
                             <Text
@@ -157,14 +160,14 @@ const ArtistScreen = ({ route }) => {
                                 ellipsizeMode='tail'
                                 style={{ fontSize: 24, fontWeight: "bold", color: "white", flex: 1 }}
                             >
-                                {artistOfSong?.name}
+                                {playlist?.name}
                             </Text>
                             <Text
                                 numberOfLines={1}
                                 ellipsizeMode='tail'
                                 style={{ fontSize: 16, fontWeight: "bold", color: "white", flex: 1 }}
                             >
-                                Songs: {artistOfSong?.songs.length}
+                                Songs: {playlist?.songs.length}
                             </Text>
                             <Text
                                 numberOfLines={1}
@@ -194,7 +197,7 @@ const ArtistScreen = ({ route }) => {
                                 marginTop: 10,
                             }}
                         >
-                            All songs of {artistOfSong?.name}
+                            All songs in {playlist?.name}
                         </Text>
                     </View>
 
@@ -215,7 +218,7 @@ const ArtistScreen = ({ route }) => {
     </>
 }
 
-export default ArtistScreen
+export default PlaylistScreen
 
 const styles = StyleSheet.create({
     container: { flex: 1, marginBottom: Platform.OS === 'android' ? 50 : 0 },

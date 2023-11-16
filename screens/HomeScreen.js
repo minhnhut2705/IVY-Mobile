@@ -29,7 +29,7 @@ const HomeScreen = () => {
 
     React.useEffect(() => {
         getTopSongs(6)
-        geTopArtists(6)
+        geTopArtists(10)
         getAllGenres()
         getAllPlaylists()
     }, [])
@@ -96,14 +96,24 @@ const HomeScreen = () => {
             console.log(error);
         }
     }
-    const updateSongStream = async (songId, stream) => {
+    // const updateSongStream = async (songId, stream) => {
+    //     try {
+    //         const response = await axios.patch(`${baseUrl}/songs/update/${songId}/stream`, { stream: stream })
+    //         console.log('====================================');
+    //         console.log("response.data.song.stream", response.data.song.stream);
+    //         console.log('====================================');
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
+
+    const updateSongStream = async (song) => {
         try {
-            const response = await axios.patch(`${baseUrl}/songs/update/${songId}/stream`, { stream: stream })
-            console.log('====================================');
-            console.log("response.data.song.stream", response.data.song.stream);
-            console.log('====================================');
+            const response = await axios.post(`${baseUrl}/songs/update/${song._id}/stream`, { song: song })
+            return response
         } catch (error) {
             console.log(error);
+            return null
         }
     }
     const geTopArtists = async (numOfArtists) => {
@@ -116,22 +126,21 @@ const HomeScreen = () => {
     }
     const setPlayingSong = async (song, index) => {
         try {
+            await getTopSongs(6)
+            const response = await updateSongStream({ ...song, stream: song.stream + 1 })
             setSongState(prev => (
                 {
                     ...prev,
                     index: index,
-                    song: song
+                    song: response.data.song
                 }
             ))
             if (currentUser) {
                 const playedSongs = currentUser.recentlyPlayed.includes(song._id) ? currentUser.recentlyPlayed : [...currentUser.recentlyPlayed, song._id]
-
                 await updateUserRecentlyPlayed(currentUser._id, playedSongs)
-                await updateSongStream(song._id, song.stream + 1)
-                // await getTopSongs(6)
             }
         } catch (error) {
-            console.log(error, "x");
+            console.log(error);
         }
     }
 
@@ -360,7 +369,18 @@ const HomeScreen = () => {
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 10, }}>
                         {
                             allPlaylists.map((item, index) => (
-                                <PlaylistCard item={item} key={index} />
+                                <Pressable key={index} style={({ pressed }) => pressed ? styles.playlistBadgePressed : styles.playlistBadge} onPress={() => navigation.navigate('Playlist', { playlistId: item._id })}>
+                                    <Image source={{ uri: item.thumbnail }} style={{ width: 69.5, height: 69.5, borderRadius: 5 }} />
+                                    <Text style={{
+                                        fontSize: 13,
+                                        fontWeight: "500",
+                                        color: "white",
+                                        marginTop: 10, width: 69.5
+                                    }} numberOfLines={1} ellipsizeMode="tail"
+                                    >
+                                        {item?.name}
+                                    </Text>
+                                </Pressable>
                             ))
                         }
                     </View>
@@ -426,5 +446,26 @@ const styles = StyleSheet.create({
         backgroundColor: MD3Colors.error50,
         borderRadius: 4,
         elevation: 3,
+    },
+    playlistBadge: {
+        borderRadius: 10,
+        fontSize: 13,
+        margin: 4,
+        fontWeight: "500",
+        color: "white",
+        marginTop: 10,
+        width: 'auto',
+        padding: 10,
+        backgroundColor: MD3Colors.neutral20
+    },
+    playlistBadgePressed: {
+        borderRadius: 10,
+        fontSize: 13,
+        fontWeight: "500",
+        margin: 4,
+        color: "white",
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: MD3Colors.error50
     }
 })

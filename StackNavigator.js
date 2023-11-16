@@ -1,12 +1,13 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import HomeScreen from './screens/HomeScreen'
-import { AntDesign, FontAwesome5, Entypo, Ionicons } from '@expo/vector-icons';
+import { AntDesign, FontAwesome5, Entypo, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import ProfileScreen from './screens/ProfileScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from './screens/LoginScreen';
 import SongScreen from './screens/SongScreen';
 import ArtistScreen from './screens/ArtistScreen';
+import PlaylistScreen from './screens/PlaylistScreen';
 import { MD3Colors } from 'react-native-paper';
 const Tab = createBottomTabNavigator()
 
@@ -14,7 +15,7 @@ const BottomTabs = () => {
     return (
         <Tab.Navigator screenOptions={{
             tabBarStyle: {
-                backgroundColor: "rgba(0,0,0,0.5)",
+                backgroundColor: "#131624",
                 position: "absolute",
                 bottom: 0,
                 height: 50,
@@ -52,6 +53,14 @@ const BottomTabs = () => {
                     return focused ? (
                         <FontAwesome5 name="diagnoses" size={24} color={MD3Colors.error50} />
                     ) : (<FontAwesome5 name="diagnoses" size={24} color='white' />)
+                }
+            }} />
+            <Tab.Screen name='Playlist' component={PlaylistScreen} options={{
+                tabBarLabel: 'Playlist', headerShown: false, tabBarLabelStyle: { color: 'white' },
+                tabBarIcon: ({ focused }) => {
+                    return focused ? (
+                        <MaterialIcons name="playlist-play" size={24} color={MD3Colors.error50} />
+                    ) : (<MaterialIcons name="playlist-play" size={24} color="white" />)
                 }
             }} />
             <Tab.Screen name='Profile' component={ProfileScreen} options={{
