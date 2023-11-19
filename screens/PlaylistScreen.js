@@ -25,11 +25,12 @@ const PlaylistScreen = ({ route }) => {
 
     const playlistId = route.params?.playlistId ? route.params.playlistId : '641c32462b9ae59914e8a5fd'
 
+
     React.useEffect(() => {
         if (playlistId) {
             getPlaylistById(playlistId)
         } else {
-            getPlaylistById(songState.song.artist[0])
+            getPlaylistById('641c32462b9ae59914e8a5fd')
         }
     }, [playlistId])
     React.useEffect(() => {
@@ -41,9 +42,6 @@ const PlaylistScreen = ({ route }) => {
     const getPlaylistById = async (playlistId) => {
         try {
             const response = await axios.get(`${baseUrl}/playlists/${playlistId}`)
-            console.log('====================================');
-            console.log(response.data.playlist);
-            console.log('====================================');
             setPlaylist(response.data.playlist)
         } catch (error) {
             console.log(error);
@@ -66,14 +64,6 @@ const PlaylistScreen = ({ route }) => {
             console.log(error);
         }
     }
-    // const updateSongStream = async (songId, stream) => {
-    //     try {
-    //         await axios.patch(`${baseUrl}/songs/update/${songId}/stream`, { stream: stream })
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
-
     const updateSongStream = async (song) => {
         try {
             const response = await axios.post(`${baseUrl}/songs/update/${song._id}/stream`, { song: song })
