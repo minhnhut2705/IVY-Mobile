@@ -43,9 +43,7 @@ const FloatingAudioPlayer = () => {
                 }
             }
         } catch (error) {
-            console.log('====================================');
             console.log(error);
-            console.log('====================================');
         }
     };
 
@@ -73,9 +71,7 @@ const FloatingAudioPlayer = () => {
                 await sound.setPositionAsync(position * songState.durationTime)
             }
         } catch (error) {
-            console.log('====================================');
             console.log(error);
-            console.log('====================================');
         }
     };
     const handleRepeat = async () => {
@@ -86,12 +82,8 @@ const FloatingAudioPlayer = () => {
                     isRepeat: !songState.isRepeat
                 }
             ))
-
-
         } catch (error) {
-            console.log('====================================');
             console.log(error);
-            console.log('====================================');
         }
     };
 
@@ -105,9 +97,7 @@ const FloatingAudioPlayer = () => {
                 }
             ))
         } catch (error) {
-            console.log('====================================');
             console.log(error);
-            console.log('====================================');
         }
     };
 
@@ -133,9 +123,7 @@ const FloatingAudioPlayer = () => {
             ))
 
         } catch (error) {
-            console.log('====================================');
             console.log(error);
-            console.log('====================================');
         }
     };
 

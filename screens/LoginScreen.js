@@ -98,7 +98,7 @@ export default function LoginScreen() {
                 <ScrollView>
                     <SafeAreaView>
                         <View style={{ paddingHorizontal: 10 }}>
-                            <Pressable onPress={() => navigation.navigate('Main')}>
+                            <Pressable onPress={() => navigation.navigate('Home')}>
                                 <Entypo name="home" size={24} color="white" />
                             </Pressable>
                         </View>

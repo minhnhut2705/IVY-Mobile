@@ -3,106 +3,180 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { COLORS, FONTS, SIZES, images } from "../constants";
-import { MaterialIcons } from "@expo/vector-icons";
 import { SceneMap, TabBar, TabView } from "react-native-tab-view";
 import axios from 'axios';
 import { baseUrl } from './LoginScreen';
 import AudioPlayer from '../components/Player';
-import { currentUserAtom } from "../store";
+import { currentUserAtom, songStateAtom } from "../store";
 import { useAtom } from "jotai";
 import { MD3Colors } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient'
-
-
-let photos = []
-const renderSong = ({ item, index }) => {
-    return (
-        <Pressable
-            style={({ pressed }) => pressed ? styles.topSongsItemPressed : styles.topSongsItem}
-
-            onPress={() => setPlayingSong(item, index)}
-        >
-            <Image
-                style={{ height: 55, width: 55 }}
-                source={{ uri: item.thumbnail }}
-            />
-            <View
-                style={{ flex: 1, marginHorizontal: 8, justifyContent: "center" }}
-            >
-                <Text
-                    numberOfLines={2}
-                    style={{ fontSize: 13, fontWeight: "bold", color: "white" }}
-                >
-                    {item.name}
-                </Text>
-            </View>
-        </Pressable>
-    );
-};
-
-
+import { useNavigation } from "@react-navigation/native";
+import Header from "../components/Header";
 
 
 const Profilecreen = () => {
     const layout = useWindowDimensions();
     const [index, setIndex] = useState(0);
-    const [topSongs, setTopSongs] = React.useState([])
+    const [userSongs, setUserSongs] = React.useState([])
+    const [userPlaylists, setUserPlaylists] = React.useState([])
     const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
-
+    const [songState, setSongState] = useAtom(songStateAtom)
+    const navigation = useNavigation()
     const [routes] = useState([
         { key: "first", title: "Songs" },
         { key: "second", title: "Playlist" },
     ]);
 
+    const renderSong = ({ item, index }) => {
+        return (
+            <Pressable
+                style={({ pressed }) => pressed ? styles.userSongsItemPressed : styles.userSongsItem}
 
+                onPress={() => setPlayingSong(item, index)}
+            >
+                <Image
+                    style={{ height: 55, width: 55 }}
+                    source={{ uri: item.thumbnail }}
+                />
+                <View
+                    style={{ flex: 1, marginHorizontal: 8, justifyContent: "center" }}
+                >
+                    <Text
+                        numberOfLines={2}
+                        style={{ fontSize: 13, fontWeight: "bold", color: "white" }}
+                    >
+                        {item.name}
+                    </Text>
+                </View>
+            </Pressable>
+        );
+    };
+    const renderPlaylist = ({ item, index }) => {
+        return (
+            <Pressable
+                style={({ pressed }) => pressed ? styles.userSongsItemPressed : styles.userSongsItem}
 
-    const PhotosRoutes = () => (
+                onPress={() => navigation.navigate('Playlist', { playlistId: item._id })}
+            >
+                <Image
+                    style={{ height: 55, width: 55 }}
+                    source={{ uri: item.thumbnail }}
+                />
+                <View
+                    style={{ flex: 1, marginHorizontal: 8, justifyContent: "center" }}
+                >
+                    <Text
+                        numberOfLines={2}
+                        style={{ fontSize: 13, fontWeight: "bold", color: "white" }}
+                    >
+                        {item.name}
+                    </Text>
+                </View>
+            </Pressable>
+        );
+    };
+
+    const SongsRoute = () => (
         <View style={{
             flex: 1,
             backgroundColor: "#040306",
-            height: 350
         }}>
             <FlatList
-                data={topSongs}
+                data={userSongs}
                 renderItem={renderSong}
                 numColumns={2}
                 columnWrapperStyle={{ justifyContent: "space-between" }}
                 showsHorizontalScrollIndicator={false}
                 scrollEnabled={false}
-                contentContainerStyle={{ flex: 1 }}
             />
         </View>
 
     );
 
-    const LikesRoutes = () => (
-        <View
-            style={{
-                flex: 1,
-                backgroundColor: "white",
-                height: 350
-            }}
-        />
+    const PlaylistsRoute = () => (
+        <View style={{
+            flex: 1,
+            backgroundColor: "#040306",
+        }}>
+            <FlatList
+                data={userPlaylists}
+                renderItem={renderPlaylist}
+                numColumns={2}
+                columnWrapperStyle={{ justifyContent: "space-between" }}
+                showsHorizontalScrollIndicator={false}
+                scrollEnabled={false}
+            />
+        </View>
     );
     const renderScene = SceneMap({
-        first: PhotosRoutes,
-        second: LikesRoutes,
+        first: SongsRoute,
+        second: PlaylistsRoute,
     });
 
     React.useEffect(() => {
-        getTopSongs(12)
-    }, [])
-
-    const getTopSongs = async (numOfSong) => {
+        console.log('====================================');
+        console.log(currentUser);
+        console.log('====================================');
+        if (currentUser) {
+            getUserSongs(currentUser.songs)
+            getUserPlaylists(currentUser.playlists)
+        } else {
+            setSongState((prev) => ({
+                ...prev,
+                isPlaying: false
+            }))
+            setCurrentUser(null)
+            navigation.navigate('Login')
+        }
+    }, [currentUser])
+    const updateSongStream = async (song) => {
         try {
-            const response = await axios.post(`${baseUrl}/songs`, { numOfSong: numOfSong })
-            setTopSongs(response.data.songs)
-            photos = response.data.songs.map(song => song.thumbnail)
+            const response = await axios.post(`${baseUrl}/songs/update/${song._id}/stream`, { song: song })
+            return response
+        } catch (error) {
+            console.log(error);
+            return null
+        }
+    }
+
+    const setPlayingSong = async (song, index) => {
+        try {
+            await getUserSongs(currentUser.songs)
+            const response = await updateSongStream({ ...song, stream: song.stream + 1 })
+            setSongState(prev => (
+                {
+                    ...prev,
+                    index: index,
+                    song: response.data.song
+                }
+            ))
+            if (currentUser) {
+                const playedSongs = currentUser.recentlyPlayed.includes(song._id) ? currentUser.recentlyPlayed : [...currentUser.recentlyPlayed, song._id]
+                await updateUserRecentlyPlayed(currentUser._id, playedSongs)
+            }
         } catch (error) {
             console.log(error);
         }
     }
 
+    const getUserSongs = async (songIDs) => {
+        try {
+            const response = await axios.post(`${baseUrl}/songs/searchSongs`, { songIDs: songIDs })
+            setUserSongs(response.data.songs)
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const getUserPlaylists = async (playlistIDs) => {
+        try {
+            const response = await axios.post(`${baseUrl}/playlists/searchPlaylists`, { playlistIDs: playlistIDs })
+            setUserPlaylists(response.data.playlists)
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     const renderTabBar = (props) => (
         <TabBar
@@ -125,9 +199,7 @@ const Profilecreen = () => {
         />
     );
 
-    console.log('====================================');
-    console.log(currentUser);
-    console.log('====================================');
+
 
     const getDaysJoined = (date) => {
         const joindDate = new Date(date)
@@ -135,20 +207,17 @@ const Profilecreen = () => {
 
         const differenceInTime = joindDate.getTime() - nowDate.getTime()
         const differenceInDay = (-differenceInTime / (1000 * 3600 * 24))
-        console.log('====================================');
-        console.log(differenceInTime, differenceInDay,);
-        console.log('====================================');
         return differenceInDay.toFixed(0)
     }
 
     return (
-        <>
+        currentUser ? <>
             <StatusBar style='light'></StatusBar>
             <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
                 <SafeAreaView
                     style={styles.container}
                 >
-                    <View style={{ marginBottom: 70, height: '100%', justifyContent: 'flex-start' }}>
+                    <ScrollView style={{ marginBottom: Platform.OS == 'android' ? 70 : 0 }}>
 
                         <View style={{ width: "100%" }}>
                             <Image
@@ -189,6 +258,7 @@ const Profilecreen = () => {
                             <View
                                 style={{
                                     flexDirection: "row",
+                                    marginVertical: 6,
                                     alignItems: "center",
                                 }}
                             >
@@ -303,28 +373,52 @@ const Profilecreen = () => {
                             </View>
                         </View>
 
-                        <View style={{ flex: 1, marginHorizontal: 10 }}>
                             <TabView
                                 navigationState={{ index, routes }}
                                 renderScene={renderScene}
                                 onIndexChange={setIndex}
                                 initialLayout={{ width: layout.width, height: layout.height }}
                                 renderTabBar={renderTabBar}
-                            />
-                        </View>
-                    </View>
+                            style={{ flex: 1, marginHorizontal: 10, height: Math.ceil(userSongs.length / 2) * 71 + 44 }}
+                        />
+                    </ScrollView>
                     <AudioPlayer></AudioPlayer>
+                </SafeAreaView>
+            </LinearGradient >
+        </> : <>
+            <StatusBar style='light'></StatusBar>
+            <LinearGradient colors={["#040306", "#131624"]} style={{ flex: 1 }}>
+                <SafeAreaView
+                    style={styles.container}
+                >
+                    <ScrollView style={{ marginBottom: Platform.OS == 'android' ? 70 : 0 }}>
+                        <Header></Header>
+
+                        <View style={{ flex: 1, marginHorizontal: 10, justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{
+                                fontSize: 24,
+                                fontWeight: "500",
+                                color: "white",
+                                marginTop: 10,
+                                textAlign: 'center',
+                                textAlignVertical: "center",
+                            }}>
+                                Please login to view this page
+                            </Text>
+                    </View>
+                        </ScrollView>
                 </SafeAreaView>
             </LinearGradient >
         </>
     );
 };
 
+
 export default Profilecreen;
 
 
 const styles = StyleSheet.create({
-    container: { flex: 1, marginBottom: Platform.OS === 'android' ? 50 : 0, justifyContent: 'flex-start' },
+    container: { flex: 1, marginBottom: Platform.OS === 'android' ? 50 : 0 },
     button: {
         backgroundColor: "#131624",
         paddingVertical: 10,
@@ -356,7 +450,7 @@ const styles = StyleSheet.create({
         color: 'white',
         textAlign: 'center'
     },
-    topSongsItem: {
+    userSongsItem: {
         flex: 1,
         flexDirection: "row",
         justifyContent: "space-between",
@@ -364,9 +458,8 @@ const styles = StyleSheet.create({
         marginVertical: 8,
         backgroundColor: "#282828",
         borderRadius: 4,
-        elevation: 3,
     },
-    topSongsItemPressed: {
+    userSongsItemPressed: {
         flex: 1,
         flexDirection: "row",
         justifyContent: "space-between",
@@ -374,7 +467,6 @@ const styles = StyleSheet.create({
         marginVertical: 8,
         backgroundColor: MD3Colors.error50,
         borderRadius: 4,
-        elevation: 3,
     },
     playlistBadge: {
         borderRadius: 10,
