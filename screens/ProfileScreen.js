@@ -32,7 +32,7 @@ const Profilecreen = ({ route }) => {
 
     useFocusEffect(
         React.useCallback(() => {
-            setRoutingState({ key: "Artist", name: "Artist", params: null })
+            setRoutingState({ key: "Profile", name: "Profile", params: null })
         }, [])
     );
 
@@ -391,7 +391,6 @@ const Profilecreen = ({ route }) => {
                             style={{ flex: 1, marginHorizontal: 10, height: Math.ceil(userSongs.length / 2) * 71 + 44 }}
                         />
                     </ScrollView>
-                    <AudioPlayer></AudioPlayer>
                 </SafeAreaView>
             </LinearGradient >
         </> : <>

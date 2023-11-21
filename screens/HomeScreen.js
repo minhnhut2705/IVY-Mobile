@@ -343,25 +343,25 @@ const HomeScreen = ({ route }) => {
                     />
                     </ScrollView>
 
-                    <Text
-                        style={{
-                            color: "white",
-                            fontSize: 19,
-                            fontWeight: "bold",
-                            marginHorizontal: 10,
-                            marginTop: 10,
-                        }}
-                    >
-                        Genres
-                    </Text>
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 10, }}>
-                        {
-                            allGenres.map((item, index) => (
-                                <GenreCard item={item} key={index} />
-                            ))
-                        }
-                    </View>
-                    <View style={{ height: 10 }} />
+                    {/* <Text
+                            style={{
+                                color: "white",
+                                fontSize: 19,
+                                fontWeight: "bold",
+                                marginHorizontal: 10,
+                                marginTop: 10,
+                            }}
+                        >
+                            Genres
+                        </Text>
+                        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 10, }}>
+                            {
+                                allGenres.map((item, index) => (
+                                    <GenreCard item={item} key={index} />
+                                ))
+                            }
+                        </View>
+                        <View style={{ height: 10 }} /> */}
                     <Text
                         style={{
                             color: "white",
