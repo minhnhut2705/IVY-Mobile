@@ -8,14 +8,15 @@ import { baseUrl } from './LoginScreen';
 import RecentlyPlayedCard from '../components/RecentlyPlayedCard'
 import ArtistCard from '../components/ArtistCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { currentUserAtom, songStateAtom } from '../store';
+import { currentUserAtom, songStateAtom, routingStateAtom } from '../store';
 import { useAtom } from 'jotai';
 import Header from '../components/Header';
 import AudioPlayer from '../components/Player';
 import GenreCard from '../components/GenreCard'
 import PlaylistCard from '../components/PlaylistCard'
 import { MD3Colors } from 'react-native-paper';
-const HomeScreen = () => {
+import { useFocusEffect } from '@react-navigation/native';
+const HomeScreen = ({ route }) => {
     const navigation = useNavigation()
     const [topSongs, setTopSongs] = React.useState([])
     const [allSongs, setAllSongs] = React.useState([])
@@ -26,7 +27,13 @@ const HomeScreen = () => {
     const [allPlaylists, setAllPlaylists] = React.useState([])
     const [songState, setSongState] = useAtom(songStateAtom)
     const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
+    const [routingState, setRoutingState] = useAtom(routingStateAtom)
 
+    useFocusEffect(
+        React.useCallback(() => {
+            setRoutingState({ key: "Home", name: "Home", params: null })
+        }, [])
+    );
     React.useEffect(() => {
         getTopSongs(6)
         geTopArtists(10)
@@ -386,7 +393,7 @@ const HomeScreen = () => {
                     </View>
                     <View style={{ height: 10 }} />
                 </ScrollView >
-                <AudioPlayer></AudioPlayer>
+                {/* <AudioPlayer></AudioPlayer> */}
             </SafeAreaView>
         </LinearGradient >
     </>

@@ -1,31 +1,30 @@
 import { StyleSheet, Image, Text, View, FlatList, StatusBar, Platform, Pressable, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useNavigation } from '@react-navigation/native'
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from 'axios';
 import { baseUrl } from './LoginScreen';
-import RecentlyPlayedCard from '../components/RecentlyPlayedCard'
-import ArtistCard from '../components/ArtistCard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { currentUserAtom, songStateAtom } from '../store';
+import { currentUserAtom, songStateAtom, routingStateAtom } from '../store';
 import { useAtom } from 'jotai';
 import Header from '../components/Header';
-import AudioPlayer from '../components/Player';
-import GenreCard from '../components/GenreCard'
-import PlaylistCard from '../components/PlaylistCard'
 import { MD3Colors } from 'react-native-paper';
+import { useFocusEffect } from '@react-navigation/native';
 import _ from 'lodash'
+
 const PlaylistScreen = ({ route }) => {
     const [topSongs, setTopSongs] = React.useState([])
     const [allSongs, setAllSongs] = React.useState([])
     const [playlist, setPlaylist] = React.useState();
     const [songState, setSongState] = useAtom(songStateAtom)
     const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
+    const [routingState, setRoutingState] = useAtom(routingStateAtom)
 
     const playlistId = route.params?.playlistId ? route.params.playlistId : '641c32462b9ae59914e8a5fd'
 
-
+    useFocusEffect(
+        React.useCallback(() => {
+            setRoutingState({ key: "Playlist", name: "Playlist", params: null })
+        }, [])
+    );
     React.useEffect(() => {
         if (playlistId) {
             getPlaylistById(playlistId)
@@ -202,7 +201,7 @@ const PlaylistScreen = ({ route }) => {
                         />
                     </ScrollView>
                 </ScrollView >
-                <AudioPlayer></AudioPlayer>
+                {/* <AudioPlayer></AudioPlayer> */}
             </SafeAreaView>
         </LinearGradient >
     </>

@@ -3,7 +3,7 @@ import { View, Text, StatusBar, StyleSheet, Pressable, Image, ImageBackground, S
 import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient'
 import Slider from '@react-native-community/slider';
-import { songStateAtom, soundPlayingAtom } from '../store';
+import { songStateAtom, soundPlayingAtom, routingStateAtom } from '../store';
 import { useAtom } from 'jotai';
 import { defaultSong } from '../components/Player';
 import { MD3Colors } from 'react-native-paper';
@@ -11,13 +11,22 @@ import { FontAwesome5, MaterialIcons, Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { baseUrl } from './LoginScreen';
 import { useNavigation } from '@react-navigation/native'
+import { useFocusEffect } from '@react-navigation/native';
 
-const FloatingAudioPlayer = () => {
+const SongScreen = ({ route }) => {
     const [sound, setSound] = useAtom(soundPlayingAtom);
     const [allSongs, setAllSongs] = React.useState();
     const [artistOfSong, setArtistOfSong] = React.useState();
     const [songState, setSongState] = useAtom(songStateAtom)
+    const [routingState, setRoutingState] = useAtom(routingStateAtom)
     const navigation = useNavigation()
+
+    useFocusEffect(
+        React.useCallback(() => {
+            setRoutingState({ key: "Song", name: "Song", params: null })
+        }, [])
+    );
+
     const handlePlayPause = async () => {
         try {
             if (sound) {
@@ -362,4 +371,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default FloatingAudioPlayer;
+export default SongScreen;

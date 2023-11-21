@@ -1,29 +1,32 @@
-import { StyleSheet, Image, Text, View, FlatList, StatusBar, Platform, Pressable, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native'
+import { StyleSheet, Image, Text, View, FlatList, StatusBar, Platform, Pressable, ScrollView, SafeAreaView } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useNavigation } from '@react-navigation/native'
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from 'axios';
 import { baseUrl } from './LoginScreen';
-import RecentlyPlayedCard from '../components/RecentlyPlayedCard'
-import ArtistCard from '../components/ArtistCard';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { currentUserAtom, songStateAtom } from '../store';
+import { currentUserAtom, songStateAtom, routingStateAtom } from '../store';
 import { useAtom } from 'jotai';
 import Header from '../components/Header';
-import AudioPlayer from '../components/Player';
-import GenreCard from '../components/GenreCard'
-import PlaylistCard from '../components/PlaylistCard'
 import { MD3Colors } from 'react-native-paper';
 import _ from 'lodash'
-const ArtistScreen = ({ route }) => {
+import { useFocusEffect } from '@react-navigation/native';
+
+const ArtistScreen = ({ navigation, route }) => {
     const [topSongs, setTopSongs] = React.useState([])
     const [allSongs, setAllSongs] = React.useState([])
     const [artistOfSong, setArtistOfSong] = React.useState();
     const [songState, setSongState] = useAtom(songStateAtom)
     const [currentUser, setCurrentUser] = useAtom(currentUserAtom)
+    const [routingState, setRoutingState] = useAtom(routingStateAtom)
 
     const artistId = route.params?.artistId ? route.params.artistId : songState.song.artist[0]
+
+
+
+    useFocusEffect(
+        React.useCallback(() => {
+            setRoutingState({ key: "Artist", name: "Artist", params: null })
+        }, [])
+    );
 
     React.useEffect(() => {
         if (artistId) {
@@ -32,6 +35,7 @@ const ArtistScreen = ({ route }) => {
             getArtistOfSong(songState.song.artist[0])
         }
     }, [artistId])
+
     React.useEffect(() => {
         if (artistOfSong) {
             getSongsByArrayOfId(artistOfSong?.songs)
@@ -209,7 +213,7 @@ const ArtistScreen = ({ route }) => {
                         />
                     </ScrollView>
                 </ScrollView >
-                <AudioPlayer></AudioPlayer>
+                {/* <AudioPlayer></AudioPlayer> */}
             </SafeAreaView>
         </LinearGradient >
     </>

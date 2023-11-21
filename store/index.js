@@ -25,6 +25,7 @@ export const defaultSong = {
 }
 export const currentUserAtom = atom(null)
 export const soundPlayingAtom = atom(null)
+export const routingStateAtom = atom({ key: "Home", name: "Home", params: null })
 export const songStateAtom = atom({
     song: defaultSong,
     index: 0,

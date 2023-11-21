@@ -9,10 +9,15 @@ import SongScreen from './screens/SongScreen';
 import ArtistScreen from './screens/ArtistScreen';
 import PlaylistScreen from './screens/PlaylistScreen';
 import { MD3Colors } from 'react-native-paper';
+import AudioPlayer from './components/Player';
+import { useAtom } from 'jotai';
+import { routingStateAtom } from './store';
 const Tab = createBottomTabNavigator()
 
 const BottomTabs = () => {
+    const [routingState, setRoutingState] = useAtom(routingStateAtom)
     return (
+        <>
         <Tab.Navigator screenOptions={{
             tabBarStyle: {
                 backgroundColor: "#131624",
@@ -30,7 +35,8 @@ const BottomTabs = () => {
                 },
                 borderTopWidth: 0
             }
-        }}>
+            }}
+            >
             <Tab.Screen name='Home' component={HomeScreen} options={{
                 tabBarLabel: 'Home', headerShown: false, tabBarLabelStyle: { color: 'white' },
                 tabBarIcon: ({ focused }) => {
@@ -70,10 +76,11 @@ const BottomTabs = () => {
                         <Ionicons name="person" size={24} color={MD3Colors.error50} />
                     ) : (<Ionicons name="person" size={24} color="white" />)
                 }
-            }} />
-
-
+                }} />
         </Tab.Navigator>
+            <AudioPlayer visible={routingState.name != 'Song'} ></AudioPlayer >
+
+        </>
     )
 }
 

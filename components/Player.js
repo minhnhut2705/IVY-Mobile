@@ -3,37 +3,25 @@ import { Text, View, StyleSheet, Button, Pressable } from 'react-native';
 import { Audio } from 'expo-av';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { useAtom } from 'jotai';
-import { songStateAtom, soundPlayingAtom } from '../store';
+import { songStateAtom, soundPlayingAtom, routingStateAtom } from '../store';
 import { ProgressBar, MD3Colors } from 'react-native-paper';
 import axios from 'axios'
 import { baseUrl } from '../screens/LoginScreen';
 import { defaultSong } from '../store';
 
-export default function AudioPlayer() {
+export default function AudioPlayer({ visible = true }) {
     const [allSongs, setAllSongs] = React.useState();
     const [songState, setSongState] = useAtom(songStateAtom)
     const [sound, setSound] = useAtom(soundPlayingAtom)
+    const [routingState, setRoutingState] = useAtom(routingStateAtom)
 
 
     const loadAudio = async (songURL = defaultSong.songURL) => {
         try {
             const { sound: song, status } = await Audio.Sound.createAsync(
-                { uri: songURL }, // Replace with the path to your audio file
+                { uri: songURL }, 
                 { shouldPlay: true },
-                // (status) => {
-                //     console.log("loadAudio");
-                //     setSongState(prev => ({
-                //         ...prev,
-                //         progress: Number((status.positionMillis / status.durationMillis).toFixed(3)),
-                //         currentTime: Number((status.positionMillis)),
-                //         durationTime: Number((status.durationMillis)),
-                //         isPlaying: true,
-                //     }))
-                //     // setProgress(Number((status.positionMillis / status.durationMillis).toFixed(3)))
-                //     // if (status.didJustFinish && songState.isRepeat) {
-                //     //     song.playAsync()
-                //     // }
-                // }
+
             );
 
             song.setOnPlaybackStatusUpdate((sng) => setSongState(prev => ({
@@ -222,8 +210,16 @@ export default function AudioPlayer() {
 
     return (
 
-        <View>
-            <View style={styles.container}>
+        <View style={{
+            opacity: visible ? 1 : 0, width: "100%",
+            bottom: 50,
+            right: 0,
+            left: 0,
+            position: "absolute",
+            alignSelf: "center",
+            justifyContent: "center",
+        }}>
+            <View style={styles.player}>
 
                 <View style={{ width: '15%' }}>
                     <Text numberOfLines={1} ellipsizeMode='tail' style={{ color: 'white' }}>{songState.song?.name}</Text>
@@ -255,13 +251,21 @@ export default function AudioPlayer() {
             <View>
                 <ProgressBar progress={Number.isNaN(songState.progress) ? 0 : songState.progress} color={MD3Colors.error50} />
             </View>
-
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
+        width: "100%",
+        bottom: 50,
+        right: 0,
+        left: 0,
+        position: "absolute",
+        alignSelf: "center",
+        justifyContent: "center",
+    },
+    player: {
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-evenly',

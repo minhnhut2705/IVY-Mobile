@@ -7,15 +7,16 @@ import { SceneMap, TabBar, TabView } from "react-native-tab-view";
 import axios from 'axios';
 import { baseUrl } from './LoginScreen';
 import AudioPlayer from '../components/Player';
-import { currentUserAtom, songStateAtom } from "../store";
+import { currentUserAtom, songStateAtom, routingStateAtom } from "../store";
 import { useAtom } from "jotai";
 import { MD3Colors } from "react-native-paper";
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from "@react-navigation/native";
 import Header from "../components/Header";
+import { useFocusEffect } from '@react-navigation/native';
 
 
-const Profilecreen = () => {
+const Profilecreen = ({ route }) => {
     const layout = useWindowDimensions();
     const [index, setIndex] = useState(0);
     const [userSongs, setUserSongs] = React.useState([])
@@ -26,7 +27,15 @@ const Profilecreen = () => {
     const [routes] = useState([
         { key: "first", title: "Songs" },
         { key: "second", title: "Playlist" },
-    ]);
+    ]);    
+    const [routingState, setRoutingState] = useAtom(routingStateAtom)
+
+    useFocusEffect(
+        React.useCallback(() => {
+            setRoutingState({ key: "Artist", name: "Artist", params: null })
+        }, [])
+    );
+
 
     const renderSong = ({ item, index }) => {
         return (
