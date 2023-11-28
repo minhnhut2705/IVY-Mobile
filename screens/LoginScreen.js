@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native'
 import { useAtom } from 'jotai'
 import { currentUserAtom } from '../store'
 
-export const baseUrl = 'http://192.168.9.106:3000/api';
+export const baseUrl = 'https://zany-erin-betta-coat.cyclic.app/api';
 export const axiosInstance = axios.create({
     baseUrl,
     headers: {
@@ -129,11 +129,10 @@ export default function LoginScreen() {
                         <Pressable on onPress={() => handleLogin()} style={({ pressed }) => pressed ? styles.buttonPressed : styles.button}>
                             <Text style={styles.buttonText}>Login</Text>
                         </Pressable>
-                        <Pressable onPress={() => handleRegister()} style={({ pressed }) => pressed ? styles.buttonPressed : styles.button}>
-                            {/* <MaterialIcons name="phone-android" size={24} color="white" /> */}
+                        {/*<Pressable onPress={() => handleRegister()} style={({ pressed }) => pressed ? styles.buttonPressed : styles.button}>
                             <Text style={styles.buttonText}>Register</Text>
                         </Pressable>
-                        {/* <Pressable style={{ backgroundColor: "#131624", padding: 10, marginLeft: 'auto', marginRight: 'auto', width: 300, borderRadius: 300, alignItems: 'center', borderColor: "#C0C0C0", borderWidth: 0.8, justifyContent: 'center', flexDirection: 'row', marginVertical: 10 }}>
+                        <Pressable style={{ backgroundColor: "#131624", padding: 10, marginLeft: 'auto', marginRight: 'auto', width: 300, borderRadius: 300, alignItems: 'center', borderColor: "#C0C0C0", borderWidth: 0.8, justifyContent: 'center', flexDirection: 'row', marginVertical: 10 }}>
                     <AntDesign name="google" size={24} color="white" />
                     <Text style={{ fontWeight: "500", color: 'white', textAlign: 'center', flex: 1 }}>Continue with Google</Text>
                 </Pressable> */}
